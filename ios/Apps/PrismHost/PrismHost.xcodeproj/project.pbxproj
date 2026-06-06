@@ -1,0 +1,661 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100000000000000000000001 /* PrismHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000101 /* PrismHostApp.swift */; };
+		100000000000000000000002 /* DeviceConsoleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000102 /* DeviceConsoleModel.swift */; };
+		100000000000000000000003 /* MonocleTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000103 /* MonocleTransport.swift */; };
+		100000000000000000000004 /* RootConsoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000104 /* RootConsoleView.swift */; };
+		100000000000000000000005 /* DeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000105 /* DeviceView.swift */; };
+		100000000000000000000006 /* DeviceConsoleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000106 /* DeviceConsoleModelTests.swift */; };
+		100000000000000000000007 /* MonocleBLETransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000110 /* MonocleBLETransport.swift */; };
+		100000000000000000000008 /* RuntimeConsoleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000111 /* RuntimeConsoleModel.swift */; };
+		100000000000000000000009 /* PrismRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000501 /* PrismRuntime */; };
+		100000000000000000000010 /* LocalConsoleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000112 /* LocalConsoleModel.swift */; };
+		100000000000000000000011 /* SecretStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000113 /* SecretStore.swift */; };
+		100000000000000000000012 /* ServiceConsoleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000114 /* ServiceConsoleModel.swift */; };
+		100000000000000000000013 /* PrismAI in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000502 /* PrismAI */; };
+		100000000000000000000014 /* PrismDiagnostics in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000503 /* PrismDiagnostics */; };
+		100000000000000000000015 /* OpenAIResponsesClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000115 /* OpenAIResponsesClient.swift */; };
+		100000000000000000000016 /* ProviderConsoleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000116 /* ProviderConsoleModel.swift */; };
+		100000000000000000000017 /* PrismTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000117 /* PrismTheme.swift */; };
+		100000000000000000000018 /* DisplayPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000118 /* DisplayPreviewView.swift */; };
+		100000000000000000000019 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000119 /* Assets.xcassets */; };
+		10000000000000000000001A /* AppIcon60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000011A /* AppIcon60x60@2x.png */; };
+		10000000000000000000001B /* AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000011B /* AppIcon60x60@3x.png */; };
+		10000000000000000000001C /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000011C /* AppIcon76x76.png */; };
+		10000000000000000000001D /* AppIcon76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000011D /* AppIcon76x76@2x.png */; };
+		10000000000000000000001E /* AppIcon83.5x83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000011E /* AppIcon83.5x83.5@2x.png */; };
+		100000000000000000000024 /* PrismWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000120 /* PrismWatchApp.swift */; };
+		100000000000000000000025 /* WatchRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000121 /* WatchRootView.swift */; };
+		100000000000000000000026 /* PhoneWatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000123 /* PhoneWatchBridge.swift */; };
+		100000000000000000000027 /* WatchSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000124 /* WatchSessionModel.swift */; };
+		100000000000000000000028 /* WatchBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000125 /* WatchBridgeTests.swift */; };
+		100000000000000000000029 /* PrismWatchModels in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000504 /* PrismWatchModels */; };
+		10000000000000000000002A /* PrismWatchModels in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000504 /* PrismWatchModels */; };
+		10000000000000000000002B /* PrismWatchModels in Frameworks */ = {isa = PBXBuildFile; productRef = 100000000000000000000504 /* PrismWatchModels */; };
+		10000000000000000000002C /* WatchConnectivityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000126 /* WatchConnectivityBridge.swift */; };
+		10000000000000000000002D /* WatchConnectivityClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000127 /* WatchConnectivityClient.swift */; };
+		10000000000000000000002E /* WatchHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000128 /* WatchHaptics.swift */; };
+		10000000000000000000002F /* WatchTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000129 /* WatchTheme.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		100000000000000000000020 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000200 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 100000000000000000000300;
+			remoteInfo = PrismHost;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		100000000000000000000101 /* PrismHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/PrismHostApp.swift; sourceTree = "<group>"; };
+		100000000000000000000102 /* DeviceConsoleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bluetooth/DeviceConsoleModel.swift; sourceTree = "<group>"; };
+		100000000000000000000103 /* MonocleTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bluetooth/MonocleTransport.swift; sourceTree = "<group>"; };
+		100000000000000000000104 /* RootConsoleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/RootConsoleView.swift; sourceTree = "<group>"; };
+		100000000000000000000105 /* DeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/DeviceView.swift; sourceTree = "<group>"; };
+		100000000000000000000106 /* DeviceConsoleModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismHostTests/DeviceConsoleModelTests.swift; sourceTree = "<group>"; };
+		100000000000000000000107 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Resources/Info.plist; sourceTree = "<group>"; };
+		100000000000000000000108 /* PrismHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrismHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000109 /* PrismHostTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PrismHostTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000110 /* MonocleBLETransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bluetooth/MonocleBLETransport.swift; sourceTree = "<group>"; };
+		100000000000000000000111 /* RuntimeConsoleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime/RuntimeConsoleModel.swift; sourceTree = "<group>"; };
+		100000000000000000000112 /* LocalConsoleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime/LocalConsoleModel.swift; sourceTree = "<group>"; };
+		100000000000000000000113 /* SecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/SecretStore.swift; sourceTree = "<group>"; };
+		100000000000000000000114 /* ServiceConsoleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/ServiceConsoleModel.swift; sourceTree = "<group>"; };
+		100000000000000000000115 /* OpenAIResponsesClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/OpenAIResponsesClient.swift; sourceTree = "<group>"; };
+		100000000000000000000116 /* ProviderConsoleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime/ProviderConsoleModel.swift; sourceTree = "<group>"; };
+		100000000000000000000117 /* PrismTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/PrismTheme.swift; sourceTree = "<group>"; };
+		100000000000000000000118 /* DisplayPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/DisplayPreviewView.swift; sourceTree = "<group>"; };
+		100000000000000000000119 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+		10000000000000000000011A /* AppIcon60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Resources/AppIcons/AppIcon60x60@2x.png"; sourceTree = "<group>"; };
+		10000000000000000000011B /* AppIcon60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Resources/AppIcons/AppIcon60x60@3x.png"; sourceTree = "<group>"; };
+		10000000000000000000011C /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Resources/AppIcons/AppIcon76x76.png; sourceTree = "<group>"; };
+		10000000000000000000011D /* AppIcon76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Resources/AppIcons/AppIcon76x76@2x.png"; sourceTree = "<group>"; };
+		10000000000000000000011E /* AppIcon83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Resources/AppIcons/AppIcon83.5x83.5@2x.png"; sourceTree = "<group>"; };
+		100000000000000000000120 /* PrismWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../PrismWatch/App/PrismWatchApp.swift; sourceTree = "<group>"; };
+		100000000000000000000121 /* WatchRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../PrismWatch/UI/WatchRootView.swift; sourceTree = "<group>"; };
+		100000000000000000000122 /* PrismWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrismWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000123 /* PhoneWatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWatchBridge.swift; sourceTree = "<group>"; };
+		100000000000000000000124 /* WatchSessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionModel.swift; sourceTree = "<group>"; };
+		100000000000000000000125 /* WatchBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismHostTests/WatchBridgeTests.swift; sourceTree = "<group>"; };
+		100000000000000000000126 /* WatchConnectivityBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityBridge.swift; sourceTree = "<group>"; };
+		100000000000000000000127 /* WatchConnectivityClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityClient.swift; sourceTree = "<group>"; };
+		100000000000000000000128 /* WatchHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHaptics.swift; sourceTree = "<group>"; };
+		100000000000000000000129 /* WatchTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../PrismWatch/UI/WatchTheme.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		100000000000000000000201 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000009 /* PrismRuntime in Frameworks */, 100000000000000000000013 /* PrismAI in Frameworks */, 100000000000000000000014 /* PrismDiagnostics in Frameworks */, 100000000000000000000029 /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000202 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (10000000000000000000002B /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000222 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (10000000000000000000002A /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		100000000000000000000210 = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000211 /* PrismHost */,
+				100000000000000000000213 /* PrismWatch */,
+				100000000000000000000212 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		100000000000000000000211 /* PrismHost */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000101 /* PrismHostApp.swift */,
+				100000000000000000000102 /* DeviceConsoleModel.swift */,
+				100000000000000000000103 /* MonocleTransport.swift */,
+				100000000000000000000110 /* MonocleBLETransport.swift */,
+				100000000000000000000111 /* RuntimeConsoleModel.swift */,
+				100000000000000000000112 /* LocalConsoleModel.swift */,
+				100000000000000000000116 /* ProviderConsoleModel.swift */,
+				100000000000000000000113 /* SecretStore.swift */,
+				100000000000000000000114 /* ServiceConsoleModel.swift */,
+				100000000000000000000115 /* OpenAIResponsesClient.swift */,
+				100000000000000000000117 /* PrismTheme.swift */,
+				100000000000000000000104 /* RootConsoleView.swift */,
+				100000000000000000000105 /* DeviceView.swift */,
+				100000000000000000000118 /* DisplayPreviewView.swift */,
+				100000000000000000000214 /* WatchBridge */,
+				100000000000000000000106 /* DeviceConsoleModelTests.swift */,
+				100000000000000000000125 /* WatchBridgeTests.swift */,
+				100000000000000000000119 /* Assets.xcassets */,
+				10000000000000000000011A /* AppIcon60x60@2x.png */,
+				10000000000000000000011B /* AppIcon60x60@3x.png */,
+				10000000000000000000011C /* AppIcon76x76.png */,
+				10000000000000000000011D /* AppIcon76x76@2x.png */,
+				10000000000000000000011E /* AppIcon83.5x83.5@2x.png */,
+				100000000000000000000107 /* Info.plist */,
+			);
+			path = .;
+			sourceTree = "<group>";
+		};
+		100000000000000000000213 /* PrismWatch */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000120 /* PrismWatchApp.swift */,
+				100000000000000000000121 /* WatchRootView.swift */,
+				100000000000000000000129 /* WatchTheme.swift */,
+				100000000000000000000215 /* Connectivity */,
+			);
+			path = ../PrismWatch;
+			sourceTree = "<group>";
+		};
+		100000000000000000000214 /* WatchBridge */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000123 /* PhoneWatchBridge.swift */,
+				100000000000000000000126 /* WatchConnectivityBridge.swift */,
+			);
+			path = WatchBridge;
+			sourceTree = "<group>";
+		};
+		100000000000000000000215 /* Connectivity */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000124 /* WatchSessionModel.swift */,
+				100000000000000000000127 /* WatchConnectivityClient.swift */,
+				100000000000000000000128 /* WatchHaptics.swift */,
+			);
+			path = Connectivity;
+			sourceTree = "<group>";
+		};
+		100000000000000000000212 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000108 /* PrismHost.app */,
+				100000000000000000000109 /* PrismHostTests.xctest */,
+				100000000000000000000122 /* PrismWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		100000000000000000000300 /* PrismHost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000000400 /* Build configuration list for PBXNativeTarget "PrismHost" */;
+			buildPhases = (
+				100000000000000000000301 /* Sources */,
+				100000000000000000000201 /* Frameworks */,
+				100000000000000000000302 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = PrismHost;
+			packageProductDependencies = (
+				100000000000000000000501 /* PrismRuntime */,
+				100000000000000000000502 /* PrismAI */,
+				100000000000000000000503 /* PrismDiagnostics */,
+				100000000000000000000504 /* PrismWatchModels */,
+			);
+			productName = PrismHost;
+			productReference = 100000000000000000000108 /* PrismHost.app */;
+			productType = "com.apple.product-type.application";
+		};
+		100000000000000000000310 /* PrismHostTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000000410 /* Build configuration list for PBXNativeTarget "PrismHostTests" */;
+			buildPhases = (
+				100000000000000000000311 /* Sources */,
+				100000000000000000000202 /* Frameworks */,
+				100000000000000000000312 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = (
+				100000000000000000000021 /* PBXTargetDependency */,
+			);
+			name = PrismHostTests;
+			packageProductDependencies = (
+				100000000000000000000504 /* PrismWatchModels */,
+			);
+			productName = PrismHostTests;
+			productReference = 100000000000000000000109 /* PrismHostTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		100000000000000000000320 /* PrismWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000000430 /* Build configuration list for PBXNativeTarget "PrismWatch" */;
+			buildPhases = (
+				100000000000000000000321 /* Sources */,
+				100000000000000000000222 /* Frameworks */,
+				100000000000000000000323 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = PrismWatch;
+			packageProductDependencies = (
+				100000000000000000000504 /* PrismWatchModels */,
+			);
+			productName = PrismWatch;
+			productReference = 100000000000000000000122 /* PrismWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		100000000000000000000200 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					100000000000000000000300 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					100000000000000000000310 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 100000000000000000000300;
+					};
+				};
+			};
+			buildConfigurationList = 100000000000000000000420 /* Build configuration list for PBXProject "PrismHost" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 100000000000000000000210;
+			packageReferences = (
+				100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */,
+			);
+			productRefGroup = 100000000000000000000212 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				100000000000000000000300 /* PrismHost */,
+				100000000000000000000310 /* PrismHostTests */,
+				100000000000000000000320 /* PrismWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		100000000000000000000302 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000019 /* Assets.xcassets in Resources */, 10000000000000000000001A /* AppIcon60x60@2x.png in Resources */, 10000000000000000000001B /* AppIcon60x60@3x.png in Resources */, 10000000000000000000001C /* AppIcon76x76.png in Resources */, 10000000000000000000001D /* AppIcon76x76@2x.png in Resources */, 10000000000000000000001E /* AppIcon83.5x83.5@2x.png in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000312 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000323 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		100000000000000000000301 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000001 /* PrismHostApp.swift in Sources */,
+				100000000000000000000002 /* DeviceConsoleModel.swift in Sources */,
+				100000000000000000000003 /* MonocleTransport.swift in Sources */,
+				100000000000000000000007 /* MonocleBLETransport.swift in Sources */,
+				100000000000000000000008 /* RuntimeConsoleModel.swift in Sources */,
+				100000000000000000000010 /* LocalConsoleModel.swift in Sources */,
+				100000000000000000000016 /* ProviderConsoleModel.swift in Sources */,
+				100000000000000000000011 /* SecretStore.swift in Sources */,
+				100000000000000000000012 /* ServiceConsoleModel.swift in Sources */,
+				100000000000000000000015 /* OpenAIResponsesClient.swift in Sources */,
+				100000000000000000000017 /* PrismTheme.swift in Sources */,
+				100000000000000000000004 /* RootConsoleView.swift in Sources */,
+				100000000000000000000005 /* DeviceView.swift in Sources */,
+				100000000000000000000018 /* DisplayPreviewView.swift in Sources */,
+				100000000000000000000026 /* PhoneWatchBridge.swift in Sources */,
+				10000000000000000000002C /* WatchConnectivityBridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000311 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000006 /* DeviceConsoleModelTests.swift in Sources */,
+				100000000000000000000028 /* WatchBridgeTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		100000000000000000000321 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000024 /* PrismWatchApp.swift in Sources */,
+				100000000000000000000025 /* WatchRootView.swift in Sources */,
+				10000000000000000000002F /* WatchTheme.swift in Sources */,
+				100000000000000000000027 /* WatchSessionModel.swift in Sources */,
+				10000000000000000000002D /* WatchConnectivityClient.swift in Sources */,
+				10000000000000000000002E /* WatchHaptics.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		100000000000000000000021 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 100000000000000000000300 /* PrismHost */;
+			targetProxy = 100000000000000000000020 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		100000000000000000000401 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHost;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		100000000000000000000402 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHost;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		100000000000000000000411 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHostTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrismHost.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrismHost";
+			};
+			name = Debug;
+		};
+		100000000000000000000412 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHostTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrismHost.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrismHost";
+			};
+			name = Release;
+		};
+		100000000000000000000421 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1 $(inherited)";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		100000000000000000000422 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		100000000000000000000431 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = PrismWatch;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.prismos.PrismHost;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHost.PrismWatch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+			};
+			name = Debug;
+		};
+		100000000000000000000432 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = PrismWatch;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.prismos.PrismHost;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHost.PrismWatch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		100000000000000000000400 /* Build configuration list for PBXNativeTarget "PrismHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000401 /* Debug */,
+				100000000000000000000402 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		100000000000000000000410 /* Build configuration list for PBXNativeTarget "PrismHostTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000411 /* Debug */,
+				100000000000000000000412 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		100000000000000000000430 /* Build configuration list for PBXNativeTarget "PrismWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000431 /* Debug */,
+				100000000000000000000432 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		100000000000000000000420 /* Build configuration list for PBXProject "PrismHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000421 /* Debug */,
+				100000000000000000000422 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+/* Begin XCLocalSwiftPackageReference section */
+		100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PrismCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		100000000000000000000501 /* PrismRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */;
+			productName = PrismRuntime;
+		};
+		100000000000000000000502 /* PrismAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */;
+			productName = PrismAI;
+		};
+		100000000000000000000503 /* PrismDiagnostics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */;
+			productName = PrismDiagnostics;
+		};
+		100000000000000000000504 /* PrismWatchModels */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */;
+			productName = PrismWatchModels;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 100000000000000000000200 /* Project object */;
+}

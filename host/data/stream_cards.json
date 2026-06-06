@@ -1,0 +1,16 @@
+[
+  {
+    "source": "SYS",
+    "title": "HOST READY",
+    "body": "Monocle link active",
+    "prio": "IMPORTANT",
+    "handoff": false
+  },
+  {
+    "source": "CAL",
+    "title": "NEXT EVENT",
+    "body": "Review agenda",
+    "prio": "INFO",
+    "handoff": true
+  }
+]
