@@ -7,6 +7,11 @@ import gc
 
 from prism import protocol
 
+def _copy_into(dst, off, src):
+    for i in range(len(src)):
+        dst[off + i] = src[i]
+
+
 # Outbound message id generator
 _msg_id = 1
 
@@ -113,7 +118,7 @@ def send_bytes(kind, payload_bytes, msg_id=None):
 
         protocol.pack_header(_tx_buf, kind, flags, mid, seq, total_len)
 
-        _tx_buf[header_len: header_len + frag_len] = frag
+        _copy_into(_tx_buf, header_len, frag)
         send_len = header_len + frag_len
         bluetooth.send(_tx_buf[:send_len])
 
@@ -218,7 +223,7 @@ def _send_stream_fragmented(kind, mid, mv, seq_start, total_len, start, end):
 
         protocol.pack_header(_tx_buf, kind, flags, mid, seq, total_len)
 
-        _tx_buf[header_len: header_len + frag_len] = frag
+        _copy_into(_tx_buf, header_len, frag)
         bluetooth.send(_tx_buf[:header_len + frag_len])
 
         offset += frag_len
@@ -280,7 +285,7 @@ class StreamSender:
                 flags |= protocol.FLAG_START
 
             protocol.pack_header(_tx_buf, self.kind, flags, self.msg_id, self.seq, self.total_len)
-            _tx_buf[header_len: header_len + frag_len] = frag
+            _copy_into(_tx_buf, header_len, frag)
             bluetooth.send(_tx_buf[:header_len + frag_len])
 
             self.seq += 1
@@ -398,7 +403,7 @@ def on_rx_frame(data):
         if end_i > _rx_total_len:
             _reset_rx()
             return
-        _rx_buf[_rx_written:end_i] = frag
+        _copy_into(_rx_buf, _rx_written, frag)
         _rx_written = end_i
 
     _rx_expected_seq += 1

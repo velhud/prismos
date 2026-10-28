@@ -118,6 +118,8 @@ public enum PrismProtocolError: Error, Equatable, Sendable {
     case fragmentExceedsKnownLength
     case missingStartFrame
     case sequenceGap(expected: UInt16, actual: UInt16)
+    case inconsistentLength
+    case tooManyStreams
     case timedOut
     case writeLengthTooSmall(Int)
 }
@@ -209,7 +211,7 @@ public struct PrismFrameSplitter: Sendable {
             throw PrismProtocolError.writeLengthTooSmall(maxWriteLength)
         }
 
-        if knownLength, payload.count > kind.maxPayloadBytes {
+        if payload.count > kind.maxPayloadBytes {
             throw PrismProtocolError.totalLengthExceedsLimit(
                 kind: kind,
                 total: UInt32(payload.count),
@@ -320,7 +322,9 @@ public final class PrismFrameReassembler {
         let isStart = header.flags.contains(.start)
         let isEnd = header.flags.contains(.end)
 
+        states = states.filter { $0.key == key || now - $0.value.startedAt <= timeout }
         if isStart {
+            guard states[key] != nil || states.count < 4 else { throw PrismProtocolError.tooManyStreams }
             try validateStart(header: header)
             states[key] = State(
                 kind: header.kind,
@@ -342,6 +346,9 @@ public final class PrismFrameReassembler {
         guard header.sequence == state.expectedSequence else {
             states.removeValue(forKey: key)
             throw PrismProtocolError.sequenceGap(expected: state.expectedSequence, actual: header.sequence)
+        }
+        guard state.knownTotal == (header.hasKnownLength ? Int(header.totalLength) : nil) else {
+            states.removeValue(forKey: key); throw PrismProtocolError.inconsistentLength
         }
         state.expectedSequence &+= 1
 

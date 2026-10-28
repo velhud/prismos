@@ -1,3 +1,5 @@
+> Current production implementation (28 October 2026): [Adaptive Shell](ADAPTIVE_SHELL_IMPLEMENTATION.md) and its [verification receipt](ADAPTIVE_SHELL_VERIFICATION.md) supersede the app-launcher/developer-console paths below. Retained designs describe reference capabilities and historical architecture, not current qualification.
+
 # PrismOS UI Layer (Repository Baseline)
 
 This document defines how UI is rendered in this repository.

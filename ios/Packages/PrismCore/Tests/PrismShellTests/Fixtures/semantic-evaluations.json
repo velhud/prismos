@@ -1,0 +1,739 @@
+[
+  {
+    "id": "calendar-today",
+    "prompt": "What do I have today?",
+    "context": {
+      "calendar": [
+        {
+          "id": "review",
+          "title": "Design review",
+          "start": "2027-01-15T08:15:00Z",
+          "end": "2027-01-15T08:45:00Z"
+        },
+        {
+          "id": "call",
+          "title": "Supplier call",
+          "start": "2027-01-15T10:00:00Z",
+          "end": "2027-01-15T10:30:00Z"
+        }
+      ]
+    },
+    "expectedReadTools": [
+      "read_upcoming_calendar"
+    ],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "You have a design review in fifteen minutes and a supplier call later today. The design review is your next fixed commitment.",
+        "spokenResponse": "Your next appointment is the design review in fifteen minutes. You also have a supplier call later today.",
+        "lensScene": {
+          "kind": "list",
+          "title": "TODAY",
+          "body": "",
+          "items": [
+            {
+              "label": "Design review",
+              "value": "In 15 minutes",
+              "actionID": null
+            },
+            {
+              "label": "Supplier call",
+              "value": "Later today",
+              "actionID": null
+            }
+          ],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "capture-note",
+    "prompt": "Remember this under Cedar naming decisions: The short name is memorable, but we should test whether new customers understand what the product does before choosing it.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "I have prepared the complete naming note under Cedar, topic naming decisions. Confirm to save it.",
+        "spokenResponse": "I can save that under Cedar naming decisions. Please confirm.",
+        "lensScene": {
+          "kind": "confirmation",
+          "title": "SAVE NOTE",
+          "body": "Cedar / naming decisions",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [
+          {
+            "id": "save_note",
+            "tool": "save_note",
+            "summary": "Save naming decision under Cedar",
+            "arguments": {
+              "title": "Naming decision",
+              "body": "The short name is memorable, but we should test whether new customers understand what the product does before choosing it.",
+              "project": "Cedar",
+              "topic": "naming decisions",
+              "query": null,
+              "dueAt": null,
+              "seconds": null,
+              "sessionKind": null
+            }
+          }
+        ],
+        "artifacts": [],
+        "clarification": null,
+        "project": "Cedar",
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "agent-blocker",
+    "prompt": "Which worker is blocked?",
+    "context": {
+      "agents": [
+        {
+          "id": "worker-1",
+          "project": "Cedar",
+          "summary": "Indexing blocked: input schema needs a decision",
+          "observedAt": "2027-01-15T08:00:00Z",
+          "expiresAt": "2027-01-15T08:05:00Z"
+        }
+      ]
+    },
+    "expectedReadTools": [
+      "get_agent_status"
+    ],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "The indexing worker is blocked because its input schema has not been approved. The API worker is running and has not requested a decision. No approval has been performed.",
+        "spokenResponse": "The indexing worker needs an input schema decision. The API worker is still running.",
+        "lensScene": {
+          "kind": "alert",
+          "title": "INDEXING",
+          "body": "Input schema decision needed",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "focus-timer",
+    "prompt": "Give me twenty minutes for this draft.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "I can start a twenty-minute timer for the draft. Confirm to begin; the timer has not started yet.",
+        "spokenResponse": "Ready to start a twenty-minute draft timer. Confirm when you are ready.",
+        "lensScene": {
+          "kind": "confirmation",
+          "title": "START FOCUS",
+          "body": "Draft · 20 minutes",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [
+          {
+            "id": "start_timer",
+            "tool": "start_timer",
+            "summary": "Start twenty-minute draft timer",
+            "arguments": {
+              "title": "Draft",
+              "body": null,
+              "project": null,
+              "topic": null,
+              "query": null,
+              "dueAt": null,
+              "seconds": 1200,
+              "sessionKind": null
+            }
+          }
+        ],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "compare-options",
+    "prompt": "Compare keeping the old API with rewriting it. The old API is stable; the rewrite adds a dependency and changes every caller.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "Keeping the old API carries less immediate integration risk because its callers already work. A rewrite may improve the design, but it introduces a new dependency and requires caller migration. For the current delivery, keep the stable API and isolate any later replacement behind tests.",
+        "spokenResponse": "For this delivery, keeping the API is safer. The rewrite would change every caller and introduce another dependency. Schedule the replacement separately.",
+        "lensScene": {
+          "kind": "comparison",
+          "title": "DELIVERY RISK",
+          "body": "",
+          "items": [
+            {
+              "label": "Keep API",
+              "value": "Known callers; lower risk",
+              "actionID": null
+            },
+            {
+              "label": "Rewrite",
+              "value": "New dependency; migrate callers",
+              "actionID": null
+            }
+          ],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "ambiguous-reminder",
+    "prompt": "Remind me tomorrow morning.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "What should I remind you about, and what time tomorrow morning should I use? No reminder has been created.",
+        "spokenResponse": "What is the reminder, and what time tomorrow morning would you like?",
+        "lensScene": {
+          "kind": "fact",
+          "title": "ONE CLARIFICATION",
+          "body": "What reminder and time?",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": "What should I remind you about, and at what time tomorrow morning?",
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "explain-failure",
+    "prompt": "Explain this failure: migration 42 requires a column added by migration 43. Production remains on the old version.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "Migration 42 is attempting to use a column that does not exist until migration 43 runs. The deployment is blocked by migration ordering, while production continues serving the previous version. Repair the dependency order and verify it on a disposable database before retrying the deployment.",
+        "spokenResponse": "The migrations are ordered incorrectly: migration 42 uses a column introduced by 43. Production is still on the old release, so the evidence does not show an outage.",
+        "lensScene": {
+          "kind": "alert",
+          "title": "DEPLOYMENT BLOCKED",
+          "body": "Migration dependency order\nProduction still on old release",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "quiet-agent-state",
+    "prompt": "Do I need to act on anything?",
+    "context": {
+      "agents": []
+    },
+    "expectedReadTools": [
+      "get_agent_status"
+    ],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "The current agent snapshot reports no open exceptions. That means this source has no decision requests; it does not establish that every other system is healthy.",
+        "spokenResponse": "The current agent source reports no decision requests.",
+        "lensScene": {
+          "kind": "blank",
+          "title": "",
+          "body": "",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "bounded-translation",
+    "prompt": "Translate: Le train part dans dix minutes. Keep the sound off.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "The train leaves in ten minutes. This is a translation of the supplied sentence, not a live caption session.",
+        "spokenResponse": null,
+        "lensScene": {
+          "kind": "caption",
+          "title": "ENGLISH",
+          "body": "The train leaves in ten minutes.",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "numbers-only",
+    "prompt": "Convert 55 foot-pounds to newton-metres. Show only the number; no audio.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "55 foot-pounds is approximately 74.57 newton-metres.",
+        "spokenResponse": null,
+        "lensScene": {
+          "kind": "fact",
+          "title": "TORQUE",
+          "body": "74.57 N·m",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "detailed-minimal-lens",
+    "prompt": "Explain the tradeoffs of a local-first note store, but keep the lens minimal.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "A local-first store keeps notes usable without a network connection and gives the host direct control over deletion and retention. Its main costs are conflict handling and backup design. Synchronization must preserve edits and avoid treating an incomplete remote view as canonical. For a single-phone initial product, atomic local persistence is simpler; add explicit export before assuming multi-device synchronization.",
+        "spokenResponse": "Local-first notes remain available offline and put retention under the phone’s control. The tradeoffs are backup and synchronization. A single-phone store is a reasonable starting point, provided export and recovery are explicit.",
+        "lensScene": {
+          "kind": "fact",
+          "title": "LOCAL FIRST",
+          "body": "Offline access\nExplicit backup needed",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "audio-only-private",
+    "prompt": "Explain why I should delay the decision. Do not show it on the lens.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "Delay the decision if its critical assumptions remain untested and the cost of waiting is lower than the cost of reversing it. Define what evidence would change your choice and set a specific review time, so postponement does not become indefinite avoidance.",
+        "spokenResponse": "Delay it when untested assumptions could change the outcome and waiting costs less than reversal. Decide what evidence you need and set a review time.",
+        "lensScene": {
+          "kind": "blank",
+          "title": "",
+          "body": "",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "retrieve-prior-note",
+    "prompt": "What did I conclude about the naming test?",
+    "context": {
+      "searchQuery": "naming",
+      "note": "The short name is memorable, but we should test whether new customers understand what the product does before choosing it."
+    },
+    "expectedReadTools": [
+      "retrieve_notes"
+    ],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "The saved note says the short name is memorable, but comprehension should be tested with new customers before selection. It records a test to run, rather than a final brand decision.",
+        "spokenResponse": "You concluded that the name is memorable, but customers should be tested for comprehension before you commit.",
+        "lensScene": {
+          "kind": "fact",
+          "title": "NAMING TEST",
+          "body": "Test comprehension first",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "follow-up-continuity",
+    "prompt": "What was the second risk you just mentioned?",
+    "context": {
+      "recentAnswer": "The first risk is synchronization conflict. The second risk is backup failure."
+    },
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "The second risk was backup failure: a phone-only note store can lose all data if the phone is lost and no export exists. That is separate from synchronization conflicts.",
+        "spokenResponse": "The second risk was losing the only copy if the phone fails. An explicit export or backup addresses that risk.",
+        "lensScene": {
+          "kind": "fact",
+          "title": "SECOND RISK",
+          "body": "Loss of the only copy",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "long-answer",
+    "prompt": "Give a complete explanation of the four stages of a reliable action.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "First, interpret the request in context and clarify missing information. Second, preview the exact intended effect and obtain the required permission and confirmation. Third, execute once using a stable action identity, recording uncertainty if the host cannot determine the outcome. Fourth, preserve a receipt and offer undo when the external system can reverse the effect. A retry must reconcile a prior uncertain outcome before creating a new effect. Display length never limits the retained answer.",
+        "spokenResponse": "A reliable action has four stages: understand, confirm, execute once, and preserve a receipt. If execution becomes uncertain, reconcile it before retrying. Offer undo where the effect can be reversed.",
+        "lensScene": {
+          "kind": "list",
+          "title": "ACTION LIFECYCLE",
+          "body": "",
+          "items": [
+            {
+              "label": "Understand",
+              "value": "Clarify missing facts",
+              "actionID": null
+            },
+            {
+              "label": "Confirm",
+              "value": "Exact effect",
+              "actionID": null
+            },
+            {
+              "label": "Execute",
+              "value": "Stable identity",
+              "actionID": null
+            },
+            {
+              "label": "Receipt",
+              "value": "Undo / reconcile",
+              "actionID": null
+            }
+          ],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "missing-comparison",
+    "prompt": "Which one is better?",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "Which two options are you comparing, and what matters most for this choice? I do not have enough context to rank them.",
+        "spokenResponse": "Which two options should I compare, and what matters most?",
+        "lensScene": {
+          "kind": "fact",
+          "title": "CLARIFY",
+          "body": "Which options and goal?",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": "Which two options are you comparing, and what matters most?",
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "explicit-reminder",
+    "prompt": "At exactly 10:00 UTC tomorrow, remind me to call the clinic.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "I can create a reminder to call the clinic tomorrow at 10:00 UTC. Confirm the displayed time before it is written.",
+        "spokenResponse": "Please confirm a clinic reminder for tomorrow at ten UTC.",
+        "lensScene": {
+          "kind": "confirmation",
+          "title": "CREATE REMINDER",
+          "body": "Call clinic · tomorrow 10 UTC",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [
+          {
+            "id": "create_reminder",
+            "tool": "create_reminder",
+            "summary": "Create clinic reminder at 10:00 UTC tomorrow",
+            "arguments": {
+              "title": "Call the clinic",
+              "body": null,
+              "project": null,
+              "topic": null,
+              "query": null,
+              "dueAt": "2027-01-16T10:00:00Z",
+              "seconds": null,
+              "sessionKind": null
+            }
+          }
+        ],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "compose-focus-session",
+    "prompt": "Put me in a focus session for Cedar and start a twenty-five-minute editing timer.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "I have prepared two actions: set the active session to focus under Cedar, and start a twenty-five-minute editing timer. Confirm each action to apply it. Neither change has occurred yet.",
+        "spokenResponse": "I can set a Cedar focus session and start the editing timer. Confirm the two actions.",
+        "lensScene": {
+          "kind": "choice",
+          "title": "FOCUS SETUP",
+          "body": "",
+          "items": [
+            {
+              "label": "Focus session",
+              "value": "Cedar",
+              "actionID": "set_session"
+            },
+            {
+              "label": "Editing timer",
+              "value": "25 minutes",
+              "actionID": "start_timer"
+            }
+          ],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [
+          {
+            "id": "set_session",
+            "tool": "set_session",
+            "summary": "Set Cedar focus session",
+            "arguments": {
+              "title": null,
+              "body": null,
+              "project": "Cedar",
+              "topic": null,
+              "query": null,
+              "dueAt": null,
+              "seconds": null,
+              "sessionKind": "focus"
+            }
+          },
+          {
+            "id": "start_timer",
+            "tool": "start_timer",
+            "summary": "Start editing timer",
+            "arguments": {
+              "title": "Editing",
+              "body": null,
+              "project": null,
+              "topic": null,
+              "query": null,
+              "dueAt": null,
+              "seconds": 1500,
+              "sessionKind": null
+            }
+          }
+        ],
+        "artifacts": [],
+        "clarification": null,
+        "project": "Cedar",
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "unavailable-source",
+    "prompt": "What is my next appointment?",
+    "context": {
+      "calendarUnavailable": true
+    },
+    "expectedReadTools": [
+      "read_upcoming_calendar"
+    ],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "Calendar access is unavailable, so I cannot establish your next appointment. Enable Calendar access in Settings or supply the appointment details.",
+        "spokenResponse": "I cannot read your calendar yet. Enable Calendar access in Settings, or tell me the appointment.",
+        "lensScene": {
+          "kind": "fact",
+          "title": "CALENDAR UNAVAILABLE",
+          "body": "Allow access in Settings",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": null,
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  },
+  {
+    "id": "unsupported-passive-capture",
+    "prompt": "Translate everyone around me continuously until I stop.",
+    "context": {},
+    "expectedReadTools": [],
+    "referencePlan": {
+      "version": 1,
+      "turn": {
+        "canonicalAnswer": "Continuous passive listening is not supported by this build. I can translate a deliberately captured short recording or text you provide. Would you like to capture one short utterance?",
+        "spokenResponse": "This build supports deliberate short captures, not continuous listening. Would you like to capture one utterance?",
+        "lensScene": {
+          "kind": "fact",
+          "title": "SHORT CAPTURE",
+          "body": "Continuous listening unavailable",
+          "items": [],
+          "progress": null,
+          "timerEnd": null,
+          "expiresInSeconds": 30
+        },
+        "proposedActions": [],
+        "artifacts": [],
+        "clarification": "Would you like to capture one short utterance?",
+        "project": null,
+        "proactiveDecision": null
+      }
+    },
+    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+  }
+]

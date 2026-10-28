@@ -43,6 +43,13 @@
 		10000000000000000000002D /* WatchConnectivityClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000127 /* WatchConnectivityClient.swift */; };
 		10000000000000000000002E /* WatchHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000128 /* WatchHaptics.swift */; };
 		10000000000000000000002F /* WatchTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000129 /* WatchTheme.swift */; };
+		300000000000000000000601 /* ShellHostModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000601 /* ShellHostModel.swift */; };
+		300000000000000000000602 /* NativeShellServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000602 /* NativeShellServices.swift */; };
+		300000000000000000000603 /* PrismShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000603 /* PrismShellView.swift */; };
+		300000000000000000000610 /* PrismShell in Frameworks */ = {isa = PBXBuildFile; productRef = 400000000000000000000601; };
+		300000000000000000000611 /* PrismShell in Frameworks */ = {isa = PBXBuildFile; productRef = 400000000000000000000601; };
+		300000000000000000000612 /* PrismShell in Frameworks */ = {isa = PBXBuildFile; productRef = 400000000000000000000601; };
+		300000000000000000000604 /* ShellNativeServicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000604; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,12 +97,19 @@
 		100000000000000000000127 /* WatchConnectivityClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityClient.swift; sourceTree = "<group>"; };
 		100000000000000000000128 /* WatchHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHaptics.swift; sourceTree = "<group>"; };
 		100000000000000000000129 /* WatchTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../PrismWatch/UI/WatchTheme.swift; sourceTree = "<group>"; };
+		200000000000000000000601 /* ShellHostModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Shell/ShellHostModel.swift"; sourceTree = "<group>"; };
+		200000000000000000000602 /* NativeShellServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Shell/NativeShellServices.swift"; sourceTree = "<group>"; };
+		200000000000000000000603 /* PrismShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Shell/PrismShellView.swift"; sourceTree = "<group>"; };
+		200000000000000000000604 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismHostTests/ShellNativeServicesTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		100000000000000000000201 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000009 /* PrismRuntime in Frameworks */, 100000000000000000000013 /* PrismAI in Frameworks */, 100000000000000000000014 /* PrismDiagnostics in Frameworks */, 100000000000000000000029 /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000202 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (10000000000000000000002B /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
-		100000000000000000000222 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (10000000000000000000002A /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000201 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
+				300000000000000000000610 /* PrismShell in Frameworks */,100000000000000000000009 /* PrismRuntime in Frameworks */, 100000000000000000000013 /* PrismAI in Frameworks */, 100000000000000000000014 /* PrismDiagnostics in Frameworks */, 100000000000000000000029 /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000202 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
+				300000000000000000000612 /* PrismShell in Frameworks */,10000000000000000000002B /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+		100000000000000000000222 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
+				300000000000000000000611 /* PrismShell in Frameworks */,10000000000000000000002A /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -112,6 +126,9 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000101 /* PrismHostApp.swift */,
+				200000000000000000000603 /* PrismShellView.swift */,
+				200000000000000000000602 /* NativeShellServices.swift */,
+				200000000000000000000601 /* ShellHostModel.swift */,
 				100000000000000000000102 /* DeviceConsoleModel.swift */,
 				100000000000000000000103 /* MonocleTransport.swift */,
 				100000000000000000000110 /* MonocleBLETransport.swift */,
@@ -128,6 +145,7 @@
 				100000000000000000000214 /* WatchBridge */,
 				100000000000000000000106 /* DeviceConsoleModelTests.swift */,
 				100000000000000000000125 /* WatchBridgeTests.swift */,
+				200000000000000000000604,
 				100000000000000000000119 /* Assets.xcassets */,
 				10000000000000000000011A /* AppIcon60x60@2x.png */,
 				10000000000000000000011B /* AppIcon60x60@3x.png */,
@@ -194,6 +212,7 @@
 			dependencies = ();
 			name = PrismHost;
 			packageProductDependencies = (
+				400000000000000000000601 /* PrismShell */,
 				100000000000000000000501 /* PrismRuntime */,
 				100000000000000000000502 /* PrismAI */,
 				100000000000000000000503 /* PrismDiagnostics */,
@@ -217,6 +236,7 @@
 			);
 			name = PrismHostTests;
 			packageProductDependencies = (
+				400000000000000000000601 /* PrismShell */,
 				100000000000000000000504 /* PrismWatchModels */,
 			);
 			productName = PrismHostTests;
@@ -235,6 +255,7 @@
 			dependencies = ();
 			name = PrismWatch;
 			packageProductDependencies = (
+				400000000000000000000601 /* PrismShell */,
 				100000000000000000000504 /* PrismWatchModels */,
 			);
 			productName = PrismWatch;
@@ -295,6 +316,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000001 /* PrismHostApp.swift in Sources */,
+				300000000000000000000603 /* PrismShellView.swift in Sources */,
+				300000000000000000000602 /* NativeShellServices.swift in Sources */,
+				300000000000000000000601 /* ShellHostModel.swift in Sources */,
 				100000000000000000000002 /* DeviceConsoleModel.swift in Sources */,
 				100000000000000000000003 /* MonocleTransport.swift in Sources */,
 				100000000000000000000007 /* MonocleBLETransport.swift in Sources */,
@@ -319,6 +343,7 @@
 			files = (
 				100000000000000000000006 /* DeviceConsoleModelTests.swift in Sources */,
 				100000000000000000000028 /* WatchBridgeTests.swift in Sources */,
+				300000000000000000000604,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -655,6 +680,7 @@
 			package = 100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */;
 			productName = PrismWatchModels;
 		};
+		400000000000000000000601 /* PrismShell */ = {isa = XCSwiftPackageProductDependency; package = 100000000000000000000500; productName = PrismShell; };
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 100000000000000000000200 /* Project object */;

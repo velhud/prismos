@@ -10,6 +10,7 @@ let package = Package(
         .watchOS(.v8)
     ],
     products: [
+        .library(name: "PrismShell", targets: ["PrismShell"]),
         .library(name: "PrismProtocol", targets: ["PrismProtocol"]),
         .library(name: "PrismDraw", targets: ["PrismDraw"]),
         .library(name: "PrismRuntime", targets: ["PrismRuntime"]),
@@ -21,6 +22,7 @@ let package = Package(
         .library(
             name: "PrismCore",
             targets: [
+                "PrismShell",
                 "PrismProtocol",
                 "PrismDraw",
                 "PrismRuntime",
@@ -33,6 +35,8 @@ let package = Package(
         )
     ],
     targets: [
+        .target(name: "PrismShell", dependencies: ["PrismModels", "PrismDraw", "PrismProtocol", "PrismAI"]),
+        .testTarget(name: "PrismShellTests", dependencies: ["PrismShell"], resources: [.copy("Fixtures")]),
         .target(name: "PrismProtocol"),
         .target(name: "PrismDraw", dependencies: ["PrismModels"]),
         .target(name: "PrismRuntime", dependencies: ["PrismDraw", "PrismModels", "PrismDiagnostics"]),

@@ -276,7 +276,7 @@ struct OpenAIVisionProcessor: VisionProcessor {
             OpenAIResponsesRequest(
                 model: configuration.visionModel,
                 input: .content([
-                    .init(type: "input_text", text: "Read visible text and summarize the scene for a 640 by 400 monochrome HUD.", imageURL: nil),
+                    .init(type: "input_text", text: "Read visible text in full and describe the scene. Preserve all recognized text; the host projects a separate bounded lens view.", imageURL: nil),
                     .init(type: "input_image", text: nil, imageURL: imageURL)
                 ]),
                 store: configuration.storeResponses,

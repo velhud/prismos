@@ -172,3 +172,8 @@ Current physical boundary after the 2026-05-31 Safe Mode repair: the recovery-sa
 A button message becomes:
 - payload bytes: `b'{"event":"BTN","id":"R","gesture":"TAP","app":"oracle","ts":123,"dur":80}'`
 - framed into one or more v1 frames depending on maximum fragment size.
+
+
+## Adaptive shell feature negotiation
+
+The production Swift link retains framing version 1 and DRAW version 1. Its shell-version-1 handshake, host session correlation, incremental audio, priority clear, display acknowledgements and offline lease are specified in [Adaptive Shell implementation](ADAPTIVE_SHELL_IMPLEMENTATION.md#protocol-and-lifecycle). The old app/media commands above remain reference protocol history; incompatible device source is reported rather than flashed automatically.

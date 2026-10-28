@@ -97,7 +97,7 @@ final class PrismDrawTests: XCTestCase {
 
     func testPayloadCannotExceedDeviceBudget() {
         let primitives = (0..<8).map { index in
-            DrawPrimitive.text(String(repeating: "x", count: 32), x: 320, y: UInt16(24 + index * 49), color: 0xFFFFFF, anchor: .middleCenter)
+            DrawPrimitive.text(String(repeating: "x", count: 26), x: 320, y: UInt16(24 + index * 49), color: 0xFFFFFF, anchor: .middleCenter)
         }
 
         let payload = try? PrismDrawPacker.pack(DrawViewport(appID: "teleprompter", primitives: primitives))

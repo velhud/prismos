@@ -45,3 +45,8 @@ TypeError: 'bytearray' object doesn't support item assignment
 ```
 
 The Monocle MicroPython build rejected bytearray slice assignment. Device BLE reassembly must use explicit byte-copy loops.
+
+
+## Adaptive shell boundary
+
+The 28 October 2026 adaptive shell changes runtime transport/media handling in `monocle/kernel.py`. It does not modify `main.py`, `boot.py`, vendor REPL recovery or the owner's physical recovery process. There was no physical deployment in the Linux implementation assignment. See [implementation and qualification](ADAPTIVE_SHELL_IMPLEMENTATION.md).

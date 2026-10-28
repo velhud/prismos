@@ -184,6 +184,7 @@ public enum TeleprompterMode: String, Sendable, Codable {
 
 public struct TeleprompterScript: Equatable, Sendable, Codable {
     public var id: UUID
+    public var sourceText: String?
     public var title: String
     public var chunks: [String]
     public var currentIndex: Int
@@ -220,27 +221,10 @@ public struct TeleprompterEngine: Sendable {
     public static let emptyScript = TeleprompterScript(title: "Empty", chunks: [])
 
     public static func importScript(title: String, body: String, maxLineCharacters: Int = 22) -> TeleprompterScript {
-        let words = body
-            .replacingOccurrences(of: "\n", with: " ")
-            .split(separator: " ")
-            .map(String.init)
-        var chunks: [String] = []
-        var current = ""
-        for word in words {
-            let candidate = current.isEmpty ? word : "\(current) \(word)"
-            if candidate.count <= maxLineCharacters {
-                current = candidate
-            } else {
-                if !current.isEmpty {
-                    chunks.append(current)
-                }
-                current = String(word.prefix(maxLineCharacters))
-            }
-        }
-        if !current.isEmpty {
-            chunks.append(current)
-        }
-        return TeleprompterScript(title: title, chunks: chunks)
+        let chunks = MonocleTextPolicy().pages(for: body, lineLength: maxLineCharacters, linesPerPage: 1)
+        var script = TeleprompterScript(title: title, chunks: body.isEmpty ? [] : chunks)
+        script.sourceText = body
+        return script
     }
 
     public mutating func edit(body: String) {

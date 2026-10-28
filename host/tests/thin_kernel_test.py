@@ -6,6 +6,7 @@ import struct
 import sys
 import time
 import types
+import tempfile
 import unittest
 
 
@@ -136,6 +137,9 @@ class TestThinKernelSafety(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("thin_kernel_under_test", KERNEL_FILE)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        module.BOOT_COUNT_FILE = os.path.join(folder.name, "boot_count.txt")
         return module
 
     @staticmethod
@@ -175,6 +179,8 @@ class TestThinKernelSafety(unittest.TestCase):
         ble = MockBluetooth(max_len=20)
         kernel = self._load_kernel(ble)
 
+        kernel.handle_cmd(json.dumps({"cmd":"HELLO","protocol_version":1,"shell_version":1,"request_id":"fixture"}).encode())
+        ble.sent.clear()
         kernel.send_btn("TAP", "R", 92)
 
         self.assertGreater(len(ble.sent), 1)
@@ -245,7 +251,7 @@ class TestThinKernelSafety(unittest.TestCase):
         self.assertIn(False, dev.prevent_sleep_calls)
         self.assertEqual(dev.force_sleep_calls, 1)
 
-    def test_host_disconnect_enters_wait_host_immediately(self):
+    def test_host_disconnect_marks_offline_immediately(self):
         ble = MockBluetooth(max_len=180)
         kernel = self._load_kernel(ble)
         ble.connected_states = [True, False]
@@ -271,8 +277,8 @@ class TestThinKernelSafety(unittest.TestCase):
             kernel.start()
 
         shown = kernel.display.last_show
-        self.assertEqual(shown[0].text, "PRISM OS")
-        self.assertEqual(shown[1].text, "WAIT HOST")
+        self.assertEqual(shown[0].text, "HOST OFFLINE")
+        self.assertEqual(shown[1].text, "Reconnect phone")
         self.assertIsNone(kernel.app)
 
     def test_wait_host_timeout_requests_sleep(self):
@@ -330,7 +336,7 @@ class TestThinKernelSafety(unittest.TestCase):
         self.assertEqual(payloads[-1]["status"], "ERROR")
         self.assertEqual(payloads[-1]["detail"], "camera deferred")
 
-    def test_capture_audio_command_returns_deferred_error(self):
+    def test_capture_audio_without_negotiated_link_fails_honestly(self):
         ble = MockBluetooth(max_len=40)
         kernel = self._load_kernel(ble)
 
@@ -338,9 +344,8 @@ class TestThinKernelSafety(unittest.TestCase):
 
         payloads = self._json_payloads(kernel, ble)
         self.assertEqual(payloads[-1]["event"], "MEDIA")
-        self.assertEqual(payloads[-1]["kind"], "AUDIO")
         self.assertEqual(payloads[-1]["status"], "ERROR")
-        self.assertEqual(payloads[-1]["detail"], "audio deferred")
+        self.assertEqual(payloads[-1]["detail"], "Microphone or shell link unavailable")
 
     def test_kernel_avoids_bytearray_slice_assignment(self):
         with open(KERNEL_FILE, "r", encoding="utf-8") as f:
@@ -457,6 +462,127 @@ class TestThinKernelSafety(unittest.TestCase):
             any(isinstance(node, ast.While) for node in ast.walk(safe_mode)),
             "safe_mode must return so vendor firmware enters REPL",
         )
+
+
+class TestAdaptiveDeviceLink(unittest.TestCase):
+    _load_kernel = TestThinKernelSafety._load_kernel
+    _restore_modules = staticmethod(TestThinKernelSafety._restore_modules)
+    _restore_time = staticmethod(TestThinKernelSafety._restore_time)
+    _json_payloads = TestThinKernelSafety._json_payloads
+    # Exercise actual device owners with only the physical module boundary doubled.
+    def ready(self, ble):
+        kernel = self._load_kernel(ble)
+        kernel.handle_cmd(json.dumps({"cmd": "HELLO", "protocol_version": 1, "shell_version": 1,
+                                      "request_id": "host-session"}).encode())
+        return kernel
+
+    def test_handshake_version_lease_and_local_blank(self):
+        ble = MockBluetooth(40)
+        kernel = self.ready(ble)
+        hello = self._json_payloads(kernel, ble)[-1]
+        self.assertEqual(hello["shell_version"], 1)
+        self.assertEqual(hello["request_id"], "host-session")
+        self.assertIn("boot_id", hello)
+        kernel.lease_step(21001)
+        self.assertIsNone(kernel.host_session)
+        self.assertEqual(kernel.display.last_show[0].text, "HOST OFFLINE")
+        kernel.emit(0, "LONG")
+        self.assertEqual(kernel.display.last_show, ())
+        self.assertTrue(kernel.local_blank)
+        kernel.handle_cmd(b'{"cmd":"HELLO","protocol_version":99,"shell_version":1}')
+        self.assertIsNone(kernel.host_session)
+
+    def test_audio_is_real_bounded_incremental_and_correlated(self):
+        ble = MockBluetooth(40)
+        kernel = self.ready(ble)
+        chunks = [bytearray([0, 127, 128, 255] * 20), bytearray([4, 5]), None]
+        calls = []
+        kernel.microphone = types.SimpleNamespace(record=lambda **kw: calls.append(kw), read=lambda n: chunks.pop(0))
+        kernel.capture_audio_to_host("request-1")
+        start = self._json_payloads(kernel, ble)[-1]
+        self.assertEqual(start["request_id"], "request-1")
+        self.assertEqual(calls, [{"seconds":4.0,"sample_rate":8000,"bit_depth":8}])
+        for _ in range(8):
+            kernel.audio_step(1600)
+        frames = [f for f in ble.sent if f[3] == 2]
+        self.assertTrue(frames)
+        self.assertEqual(b"".join(f[13:] for f in frames), bytes([0,127,128,255] * 20 + [4,5]))
+        headers = [struct.unpack_from("<2sBBBHHI", f) for f in frames]
+        self.assertEqual([h[5] for h in headers], list(range(len(headers))))
+        self.assertTrue(headers[0][3] & kernel.F_START)
+        self.assertTrue(headers[-1][3] & kernel.F_END)
+        self.assertTrue(all(h[4] == start["stream_id"] for h in headers))
+        self.assertIsNone(kernel.audio)
+
+    def test_cancel_stops_transport_and_lease_does_not_restart_recording(self):
+        ble = MockBluetooth(40); kernel = self.ready(ble)
+        calls = []
+        kernel.microphone = types.SimpleNamespace(record=lambda **kw:calls.append(kw), read=lambda n:bytearray([1,2]))
+        kernel.capture_audio_to_host("request-2")
+        kernel.handle_cmd(b'{"cmd":"CANCEL_CAPTURE"}')
+        count = len(ble.sent); kernel.audio_step(2000)
+        self.assertEqual(len(ble.sent),count)
+        self.assertEqual(len(calls),1)
+        kernel.emit(0,"LONG"); kernel.lease_step(21001)
+        self.assertEqual(kernel.display.last_show,())
+
+    def test_control_backpressure_retries_exact_fragment(self):
+        ble = MockBluetooth(20); kernel = self._load_kernel(ble)
+        original = ble.send
+        failures = [True]
+        def send(data):
+            if failures:
+                failures.pop(); raise RuntimeError("busy")
+            original(data)
+        ble.send = send
+        kernel.send_json('{"event":"TEST","value":"complete payload"}')
+        self.assertEqual(len(kernel.tx_controls),1)
+        kernel.tx_step()
+        self.assertEqual(len(kernel.tx_controls),0)
+        self.assertEqual(self._json_payloads(kernel,ble)[-1]["value"],"complete payload")
+
+    def test_empty_draw_actually_blanks(self):
+        kernel = self.ready(MockBluetooth(40))
+        kernel.show_screen("OLD")
+        self.assertTrue(kernel.draw_binary(bytes([1,0,5,0]) + b"prism"))
+        self.assertEqual(kernel.display.last_show,())
+
+    def test_inbound_begin_draw_order_and_queue_bound(self):
+        ble = MockBluetooth(40); kernel = self.ready(ble)
+        kernel.local_blank = True
+        def feed(kind, payload, mid):
+            for seq, off in enumerate(range(0, len(payload), 7)):
+                frag = payload[off:off + 7]
+                flags = (kernel.F_START if off == 0 else 0) | (kernel.F_END if off + len(frag) == len(payload) else 0)
+                kernel.on_rx(struct.pack(kernel.HDR, kernel.MAGIC, 1, kind, flags, mid, seq, len(payload)) + frag)
+        feed(1, b'{"cmd":"BEGIN_INTERACTION"}', 100)
+        text = b"CURRENT"
+        draw = bytes([1,0,5,1]) + b"prism" + bytes([1]) + struct.pack("<HHIBB",320,100,0xFFFFFF,0,len(text)) + text
+        feed(5, draw, 101)
+        self.assertEqual(len(kernel.inbound), 2)
+        kernel.process_inbound()
+        self.assertFalse(kernel.local_blank)
+        self.assertEqual(kernel.display.last_show[0].text,"CURRENT")
+        for i in range(12):
+            feed(1,b'{"cmd":"CANCEL_CAPTURE"}',200+i)
+        self.assertEqual(len(kernel.inbound),8)
+        kernel.handle_cmd(b"[]")
+        kernel.handle_cmd(b"null")
+        self.assertEqual(kernel.host_session,"host-session")
+
+    def test_physical_blank_rejects_late_activation_and_capture_until_acknowledged(self):
+        ble = MockBluetooth(40); kernel = self.ready(ble)
+        calls = []
+        kernel.microphone = types.SimpleNamespace(record=lambda **kw:calls.append(kw),read=lambda n:None)
+        kernel.emit(0,"LONG")
+        kernel.handle_cmd(b'{"cmd":"BEGIN_INTERACTION","input_ts":999}')
+        kernel.capture_audio_to_host("late")
+        self.assertTrue(kernel.local_blank)
+        self.assertEqual(calls,[])
+        kernel.handle_cmd(b'{"cmd":"BEGIN_INTERACTION","input_ts":1000}')
+        kernel.capture_audio_to_host("new")
+        self.assertFalse(kernel.local_blank)
+        self.assertEqual(len(calls),1)
 
 
 if __name__ == "__main__":

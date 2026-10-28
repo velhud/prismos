@@ -178,8 +178,12 @@ public enum MonocleDisplayValidator {
         for primitive in viewport.primitives {
             switch primitive {
             case let .text(text, x, y, _, anchor):
+                guard text.utf8.count <= PrismDrawConstants.maxTextBytes else { throw PrismDrawError.textTooLong(text.utf8.count) }
                 try validatePoint(x: x, y: y, viewport: options.viewport)
                 let rect = CGRectLike.textBounds(text: text, x: Int(x), y: Int(y), anchor: anchor)
+                guard rect.left >= 0, rect.top >= 0, rect.right <= options.viewport.width, rect.bottom <= options.viewport.height else {
+                    throw PrismDrawError.coordinateOutOfBounds
+                }
                 if textBounds.contains(where: { $0.intersects(with: rect) }) {
                     throw PrismDrawError.overlappingTextRows
                 }

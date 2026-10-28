@@ -23,28 +23,30 @@ public struct MonocleTextPolicy: Equatable, Sendable {
     }
 
     public func pages(for text: String, lineLength: Int = MonocleDisplayTextStyle.nativeColumns, linesPerPage: Int = 4) -> [String] {
-        let words = conciseHUDText(text).split(separator: " ").map(String.init)
+        let columns = max(1, min(lineLength, MonocleDisplayTextStyle.nativeColumns))
+        let words = text.split(whereSeparator: { $0.isWhitespace }).map(String.init)
         var lines: [String] = []
         var current = ""
         for word in words {
-            if current.isEmpty {
-                current = word
-            } else if current.count + 1 + word.count <= lineLength {
-                current += " \(word)"
-            } else {
-                lines.append(current)
-                current = word
+            if !current.isEmpty && current.count + 1 + word.count <= columns && (current + " " + word).utf8.count <= 32 {
+                current += " " + word
+                continue
+            }
+            if !current.isEmpty { lines.append(current); current = "" }
+            for char in word {
+                if current.count >= columns || (current + String(char)).utf8.count > 32 {
+                    if !current.isEmpty { lines.append(current) }; current = ""
+                }
+                if String(char).utf8.count > 32 { lines.append("?") } else { current.append(char) }
             }
         }
-        if !current.isEmpty {
-            lines.append(current)
-        }
+        if !current.isEmpty { lines.append(current) }
 
         var pages: [String] = []
         var index = 0
         while index < lines.count {
-            pages.append(lines[index..<min(index + linesPerPage, lines.count)].joined(separator: "\n"))
-            index += linesPerPage
+            pages.append(lines[index..<min(index + max(1, linesPerPage), lines.count)].joined(separator: "\n"))
+            index += max(1, linesPerPage)
         }
         return pages.isEmpty ? [""] : pages
     }
@@ -379,8 +381,7 @@ public struct OracleEngine: Equatable, Sendable {
         } else {
             prompt = ""
         }
-        let concise = outputPolicy.conciseHUDText(answer)
-        let record = OracleAnswer(id: requestID, prompt: prompt, text: concise, source: source, createdAt: now)
+        let record = OracleAnswer(id: requestID, prompt: prompt, text: answer, source: source, createdAt: now)
         history.insert(record, at: 0)
         state = .answer(record)
         currentRequestID = nil
@@ -512,7 +513,7 @@ public struct OracleEngine: Equatable, Sendable {
     }
 
     private func hudPrompt(for prompt: String) -> String {
-        "Answer for a Monocle HUD in under 25 words. Front-load facts. No Markdown.\n\(prompt)"
+        "Answer completely. The host projects and pages the answer separately for the lens.\n\(prompt)"
     }
 
     private mutating func adjustDensity(by delta: Int) {
@@ -658,8 +659,8 @@ public struct VisionEngine: Equatable, Sendable {
         let result = VisionResult(
             id: requestID,
             mode: mode,
-            summary: outputPolicy.conciseHUDText(summary),
-            ocrText: outputPolicy.conciseHUDText(ocrText),
+            summary: summary,
+            ocrText: ocrText,
             captureBytes: captureBytes
         )
         state = .result(result)
@@ -826,7 +827,7 @@ public struct BabelEngine: Equatable, Sendable {
 
     public mutating func receiveTranslation(_ translation: String, requestID: PrismRequestID) -> Bool {
         guard requestID.isCurrent(comparedTo: currentRequestID) else { return false }
-        append(.final, outputPolicy.conciseHUDText(translation))
+        append(.final, translation)
         currentRequestID = nil
         return true
     }
@@ -933,10 +934,7 @@ public struct BabelEngine: Equatable, Sendable {
     }
 
     private mutating func append(_ kind: BabelLineKind, _ text: String) {
-        lines.append(BabelLine(kind: kind, text: outputPolicy.conciseHUDText(text)))
-        if lines.count > 24 {
-            lines.removeFirst(lines.count - 24)
-        }
+        lines.append(BabelLine(kind: kind, text: text))
     }
 
     private func transcriptText() -> String {

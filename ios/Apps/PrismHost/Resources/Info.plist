@@ -50,6 +50,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
+		<string>audio</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
@@ -60,5 +61,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Prism reads upcoming events only when you enable Calendar context.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Prism creates and can undo reminders you explicitly confirm.</string>
 </dict>
 </plist>

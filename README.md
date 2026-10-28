@@ -1,100 +1,37 @@
 # PrismOS
 
-PrismOS is a host-first operating surface for Brilliant Labs Monocle hardware. The iPhone Host owns BLE, app state, layout, providers, media processing, persistence, diagnostics, recovery, and bounded `DRAW` output. Monocle stays a thin display, touch, camera, microphone, and boot/recovery endpoint.
+PrismOS is a native, host-first personal assistant for Brilliant Labs Monocle. One iPhone-owned conversation generates temporary interfaces across the lens, speech, phone and Watch. The lens is blank by default. The normal phone app has **Home, Lens, Library and Settings**.
 
-The repository also contains a Series 3-first Apple Watch companion. The Watch is a control surface for PrismOS, not a second Monocle host: it renders compact state snapshots, sends semantic commands to the iPhone, and leaves BLE, providers, persistence, recovery, diagnostics, and display layout on the phone.
+The iPhone owns Bluetooth, context, model requests, actions, persistence and rendering. Monocle renders bounded text payloads and reports gestures and deliberately captured audio. Watch projects the phone's state; it never owns BLE or provider calls.
 
-This public repository is a clean export of the project source and selected documentation. It intentionally excludes private history, local environment files, generated artifacts, personal signing metadata, and hardware-specific evidence logs.
+## Adaptive shell
 
-## Current Product Surface
+- Typed or deliberately captured voice → context → structured `ExperiencePlan` → native scene → bounded binary DRAW.
+- Complete answers and transcripts in an atomic, protected local Library; separate spoken and glanceable lens responses.
+- Twelve trusted scene types: blank, activity, fact, list, comparison, choice, confirmation, progress, caption, timer, alert and route. Models cannot supply coordinates or executable UI.
+- Notes, search, EventKit reminders, calendar reads, optional authenticated agent exceptions, timers and session/project state. Mutations require an exact preview and confirmation, then produce receipts and undo where supported.
+- Optional upcoming-calendar candidates interpreted by AI, with source, time, reason, expiry, dismiss, snooze and durable duplicate suppression.
+- Explicit remembered Monocle identity, CoreBluetooth restoration, fragmented writes, backpressure, media reconstruction, cancellation and an offline display lease.
 
-- Native iPhone/iPad Host app: `ios/Apps/PrismHost`.
-- Apple Watch companion app: `ios/Apps/PrismWatch`.
-- Shared pure Swift package: `ios/Packages/PrismCore`.
-- Thin Monocle firmware/runtime: `monocle/`.
-- Desktop/reference Host harness: `host/`.
-- Product and architecture docs: `Documentation/`.
-
-Active production apps are Oracle, Vision, Signal, Chronos, Teleprompter, Babel, and the documented Gallery OS camera surface. Navigate and Recall remain archived prototypes unless future product work revives them with real runtime support.
-
-## Architecture
-
-PrismOS keeps authority on the host:
-
-- The iPhone selects the Monocle by explicit identity, connects over Raw Data BLE, and sends binary `DRAW` frames.
-- Monocle reports button, audio, image, and status events; it does not run provider logic or own app state.
-- `PrismCore` contains platform-neutral protocol, draw, runtime, diagnostics, persistence, AI contracts, and watch model code.
-- `PrismHost` contains platform services such as CoreBluetooth, Keychain, OpenAI transports, SwiftUI screens, and WatchConnectivity.
-- `PrismWatch` uses WatchConnectivity snapshots and commands. It does not talk directly to Monocle in the current product shape.
-
-## App State
-
-- Oracle: text and voice questions, bounded HUD answers, answer paging, copy/keep/follow-up controls, and provider-backed responses when credentials are configured.
-- Vision: Monocle image capture request path, OCR/scene analysis state, note save, retake/cancel, and Oracle follow-up.
-- Signal: local card stack, priority order, privacy masking, selection, dismissal, reload, and handoff URL support.
-- Chronos: timer/stopwatch state, alarm boundary, pinning, duration presets, add-time, reset, and host-owned truth.
-- Teleprompter: host-imported script chunks, manual/auto movement, bookmark, reset, WPM adjustment, and privacy masking.
-- Babel: text/audio translation state, freeze, language swap, presets, transcript save/clear, and repeat-last.
-- Gallery OS: product-facing camera surface; real Monocle image capture is currently blocked by the device camera path recorded in `Documentation/MONOCLE_CAMERA_CAPTURE_FAILURE_2026_05_30.md`.
-
-## Apple Watch State
-
-The Watch app source is present and builds. It includes:
-
-- a `PrismWatch` watchOS target;
-- a compact Lens Deck and per-app Watch decks for Oracle, Vision, Signal, Chronos, Teleprompter, and Babel;
-- `PrismWatchModels` snapshots, commands, acknowledgements, validators, reducers, and wire codecs;
-- iPhone-side WatchConnectivity bridge code;
-- Watch-side command queuing, acknowledgement display, degraded/offline states, haptics, and simulator debug launch state.
-
-The implementation is simulator-verified for build and model/bridge tests, but real Apple Watch, paired iPhone, and Monocle behavior remains hardware-gated. Current follow-up is product polish and real-device validation: Lens Deck copy/typography, selected-app-vs-active-surface clarity, and per-deck functionality review.
-
-## Repository Layout
-
-```text
-host/                         Desktop/reference Host harness and tests
-monocle/                      Thin device runtime and Monocle helpers
-ios/Apps/PrismHost/           iPhone/iPad SwiftUI Host app
-ios/Apps/PrismWatch/          Apple Watch companion app
-ios/Packages/PrismCore/       Shared Swift packages and tests
-Documentation/                Product, architecture, app, protocol, and hardware docs
-docs/                         Operator-facing repository map and action notes
-tools/                        Local hardware/debug utilities
-```
+**Qualification:** the shared Swift runtime and Python device/reference tests execute on Linux. Apple adapter sources and platform tests are present, but this change has not been compiled with Xcode or exercised on an iPhone, Watch or Monocle. Reference scenario replay is not a live model quality score. See [implementation status](Documentation/ADAPTIVE_SHELL_IMPLEMENTATION.md) for the exact inventory, evidence classes and remaining acceptance gates.
 
 ## Setup
 
-Python tools:
+Open `ios/PrismOS.xcworkspace` in Xcode. Public-safe bundle identifiers are checked in; supply your own signing team locally for physical devices.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-```
+In Settings, select your Monocle explicitly and configure your assistant API key in Keychain. Cloud processing, calendar context and proactive surfaces start disabled. The production text model retains the repository's `gpt-5.5` default; bounded voice capture uses file transcription with `gpt-transcribe` and native iPhone speech output. API billing is separate from ChatGPT/Codex subscriptions. No provider calls are needed to run offline tests.
 
-Open the iOS workspace or project in Xcode:
+An existing Monocle runtime without shell version 1 reports incompatibility. This app does not flash, reset or recover hardware automatically. Keep `monocle/main.py` and `monocle/boot.py` recoverable and follow the hardware owner's separate deployment/recovery process.
 
-```bash
-open ios/PrismOS.xcworkspace
-```
+The old Oracle, Chronos, Babel, Signal, Vision and Teleprompter console remains available only after entering Developer Mode. Camera repair, continuous passive capture, arbitrary generated code/UI, universal app control and remote approvals are outside this build. Python is a protocol/device laboratory, not a second production assistant.
 
-The checked-in Xcode project uses public-safe bundle identifiers and no personal Apple Team ID. For real-device builds, set your own team and bundle identifiers locally in Xcode or via build settings.
-
-Provider calls are optional. The iOS Host stores secrets in Keychain. The desktop host can read provider settings from environment variables or a local `.env` file.
-
-## Verification Entry Points
-
-Use these from the repository root:
+## Verification
 
 ```bash
 swift test --package-path ios/Packages/PrismCore
+python3 -m unittest discover -s host/tests -p '*_test.py'
 xcodebuild test -project ios/Apps/PrismHost/PrismHost.xcodeproj -scheme PrismHost -destination 'platform=iOS Simulator,name=iPhone 16' CODE_SIGNING_ALLOWED=NO
 xcodebuild build -project ios/Apps/PrismHost/PrismHost.xcodeproj -scheme PrismWatch -destination 'platform=watchOS Simulator,name=Apple Watch SE 3 (40mm)' CODE_SIGNING_ALLOWED=NO
 ```
 
-Current local Xcode installations may not provide an Apple Watch Series 3 simulator. Series 3 compatibility remains a source and hardware requirement, while simulator checks use the smallest available watchOS simulator unless a Series 3 runtime is installed.
-
-Physical Monocle, iPhone, and Apple Watch behavior remains hardware-gated unless exact device evidence is recorded. Before any physical Monocle deploy, BLE test, boot change, renderer change, or live media check, read `Documentation/MONOCLE_RECOVERY_RUNBOOK.md`.
-
-Hardware evidence should stay private unless device identifiers and personal signing details have been removed.
+Hardware verification and private identifiers must stay outside the public repository. Provider keys belong in Keychain or ignored environment files. The recovered private discussion is not part of this repository.
