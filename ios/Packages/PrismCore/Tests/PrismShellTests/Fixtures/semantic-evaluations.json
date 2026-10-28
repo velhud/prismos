@@ -53,7 +53,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Ground both appointments in the supplied calendar and fictional clock. Explain the next commitment in speech and put times in a compact list. Never claim a calendar write."
   },
   {
     "id": "capture-note",
@@ -97,7 +97,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Preserve the complete thought, project association and exact note body. Offer save_note for confirmation; do not claim it was already saved."
   },
   {
     "id": "agent-blocker",
@@ -137,7 +137,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Use only supplied fresh exceptions. Explain the actual blocked worker and decision; do not manufacture healthy workers or account access."
   },
   {
     "id": "focus-timer",
@@ -181,7 +181,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Propose a twenty-minute timer with 1200 seconds and useful title. Explain that confirmation is required; show a timer-compatible complement."
   },
   {
     "id": "compare-options",
@@ -220,7 +220,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Compare the actual supplied options and constraints. Explain tradeoffs in speech; a compact comparison should complement the complete answer."
   },
   {
     "id": "ambiguous-reminder",
@@ -248,7 +248,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Ask which morning/time is intended. Do not propose a reminder with an invented due time or claim an effect."
   },
   {
     "id": "explain-failure",
@@ -276,7 +276,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Explain the supplied failure and practical next step without inventing runtime observations. Speech should be complete and lens should emphasize the next useful fact."
   },
   {
     "id": "quiet-agent-state",
@@ -308,7 +308,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "An empty exception list supports no current exception, not proof all workers are healthy. Keep the lens quiet and do not create a noisy alert."
   },
   {
     "id": "bounded-translation",
@@ -336,7 +336,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Translate supplied text accurately with a caption and retain the full transcript. State bounded capture limits when continuous listening is requested."
   },
   {
     "id": "numbers-only",
@@ -364,7 +364,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Honor the requested minimal numeric glance. Preserve explanation in canonical memory and avoid unnecessary visual prose."
   },
   {
     "id": "detailed-minimal-lens",
@@ -392,7 +392,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Give a complete detailed answer and independently complete spoken response. Keep only the requested key complement on the lens."
   },
   {
     "id": "audio-only-private",
@@ -420,7 +420,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Honor the explicit no-lens request with blank. Provide complete audio/canonical content and no proposed effect."
   },
   {
     "id": "retrieve-prior-note",
@@ -453,7 +453,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Retrieve and interpret the supplied full prior note; do not invent another project match. Keep provenance and useful context in the answer."
   },
   {
     "id": "follow-up-continuity",
@@ -483,7 +483,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Interpret the follow-up using the supplied prior complete answer. Do not ask the user to repeat context already available."
   },
   {
     "id": "long-answer",
@@ -532,7 +532,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Preserve every substantive detail and final conclusion in canonical and spoken output as appropriate. Projection may page; memory must not truncate."
   },
   {
     "id": "missing-comparison",
@@ -560,7 +560,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Ask for the missing option or criterion. Do not manufacture a winner or fake comparison data."
   },
   {
     "id": "explicit-reminder",
@@ -604,7 +604,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Use the exact explicit future timestamp/title from the prompt, with confirmation. Never claim the reminder already exists."
   },
   {
     "id": "compose-focus-session",
@@ -674,7 +674,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Propose the requested session/project and timer as separate exact confirmable actions. Do not lose the second action after the first receipt."
   },
   {
     "id": "unavailable-source",
@@ -706,7 +706,7 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Explain the unavailable calendar boundary clearly. Do not fabricate appointments or imply permission was granted."
   },
   {
     "id": "unsupported-passive-capture",
@@ -734,6 +734,6 @@
         "proactiveDecision": null
       }
     },
-    "rubric": "Assess factual grounding, complete content, chosen modality, actions and permission policy in context. Do not score by token presence."
+    "rubric": "Explain that passive always-on capture is unavailable and offer a bounded alternative. Do not start a perpetual microphone or invent transcripts."
   }
 ]

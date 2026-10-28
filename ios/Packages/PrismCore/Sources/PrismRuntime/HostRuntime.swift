@@ -371,14 +371,12 @@ public struct AppCoordinatorCore: Sendable {
 
     public mutating func handleButton(_ event: ButtonEvent, context: RuntimeContext = RuntimeContext()) -> RuntimeEffect? {
         guard !reservedGestures.shouldIntercept(event) else {
+            let effect: RuntimeEffect?
+            if event.side == .left, event.gesture == .longPress { effect = exitToOrbit(context: context) }
+            else if event.side == .right, event.gesture == .doubleTap { effect = focus(appID: .oracle, context: context) }
+            else { effect = nil }
             appendDiagnostic(category: .app, message: "Reserved gesture intercepted")
-            if event.side == .left, event.gesture == .longPress {
-                return exitToOrbit(context: context)
-            }
-            if event.side == .right, event.gesture == .doubleTap {
-                return focus(appID: .oracle, context: context)
-            }
-            return nil
+            return effect
         }
         guard case let .focused(appID) = surface else {
             appendDiagnostic(category: .app, message: "Orbit button ignored")

@@ -92,6 +92,7 @@ struct ShellWatchView: View {
                                         Text(action.summary).bold()
                                         if let title = action.arguments.title { Text(title) }
                                         if let body = action.arguments.body { Text(body) }
+                                        if let query = action.arguments.query { Text(query) }
                                         if let project = action.arguments.project { Text("Project: " + project) }
                                         if let topic = action.arguments.topic { Text("Topic: " + topic) }
                                         if let due = action.arguments.dueAt { Text(due.formatted()) }

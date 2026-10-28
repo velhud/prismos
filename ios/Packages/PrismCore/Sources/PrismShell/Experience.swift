@@ -58,6 +58,7 @@ public struct LensScene: Codable, Equatable, Sendable {
 public enum ToolName: String, Codable, CaseIterable, Sendable {
     case saveNote = "save_note", retrieveNotes = "retrieve_notes", createReminder = "create_reminder"
     case readCalendar = "read_upcoming_calendar", agentStatus = "get_agent_status"
+    case continueConversation = "continue_conversation"
     case startTimer = "start_timer", stopTimer = "stop_timer", setSession = "set_session"
     public var mutates: Bool { ![.retrieveNotes, .readCalendar, .agentStatus].contains(self) }
 }
@@ -93,7 +94,7 @@ public struct ProposedAction: Codable, Equatable, Identifiable, Sendable {
         switch tool {
         case .saveNote: guard let b = a.body, !b.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                               let t = a.title, !t.isEmpty else { throw ShellError.invalid("Note needs a title and complete body") }
-        case .retrieveNotes: guard a.query?.isEmpty == false else { throw ShellError.invalid("Search needs a query") }
+        case .retrieveNotes, .continueConversation: guard a.query?.isEmpty == false else { throw ShellError.invalid("Search needs a query") }
         case .createReminder: guard a.title?.isEmpty == false, let due = a.dueAt, due > now,
                                     due.timeIntervalSince(now) < 10 * 366 * 86400 else { throw ShellError.invalid("Clarify reminder title and future date/time") }
         case .startTimer: guard let seconds = a.seconds, (1...86400).contains(seconds), a.title?.isEmpty == false else { throw ShellError.invalid("Timer needs a title and duration of 1 second to 24 hours") }
@@ -145,7 +146,7 @@ public struct AssistantTurn: Codable, Equatable, Sendable {
         try lensScene.validate(actionIDs: Set(proposedActions.map(\.id)))
         for action in proposedActions { guard action.tool.mutates else { throw ShellError.invalid("Read tools must run through the read contract") }; try action.validate(now: now) }
         for artifact in artifacts {
-            guard !artifact.title.isEmpty, artifact.body.utf8.count <= 262_144 else { throw ShellError.invalid("Invalid artifact") }
+            guard artifact.kind != .receipt, !artifact.title.isEmpty, artifact.body.utf8.count <= 262_144 else { throw ShellError.invalid("Invalid artifact") }
         }
     }
 }

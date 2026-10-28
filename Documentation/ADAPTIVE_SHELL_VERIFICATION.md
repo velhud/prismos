@@ -1,44 +1,63 @@
-# Adaptive shell VM verification receipt
+# Adaptive shell verification receipt
 
-Date: 28 October 2026. Environment: Ubuntu 24.04, x86_64. Source base: `e2f9ac47dd5c0a661154ce87de5d99ea68ad526b`. Integration branch: `implement/adaptive-shell-20261028`. This is source/offline verification, not an Apple build or hardware release label.
+Date: 28 October 2026. Integration branch: `implement/adaptive-shell-20261028`. Source base: `e2f9ac47dd5c0a661154ce87de5d99ea68ad526b`. Source, executable fixture, Apple simulator, live provider and physical-device evidence are distinct. This is not a release or physical acceptance label.
+
+## Executed checks
 
 | Check | Result / evidence class |
 |---|---|
-| Untouched base, `swift test --package-path ios/Packages/PrismCore --jobs 4` in a separate extracted source tree | **85 tests passed**, no failures; executable Linux baseline |
-| Integrated package, same command | **114 tests passed**, no failures; executable Linux package tests, final run at 04:18 UTC |
-| `python3 -m unittest discover -s host/tests -p '*_test.py'` | **72 tests passed**, no failures; executable Python/reference/device-owner tests, final run at 04:23 UTC |
-| Swift frontend parse of all `ios/Apps/**/*.swift` | Passed; syntax only, no Apple SDK type checking |
-| `swift package --package-path ios/Packages/PrismCore dump-package` | Passed; includes `PrismShell` standalone and in the aggregate product |
-| Xcode object IDs/new source membership, `Info.plist`, fixture JSON | Checked; static project/config evidence only |
+| Untouched base package in a separate extracted tree | **85 tests passed**, Linux baseline |
+| `swift test --package-path ios/Packages/PrismCore --jobs 4` | **122 tests passed**, Linux executable package owners |
+| `python3 -m unittest discover -s host/tests -p '*_test.py'` | **72 tests passed**, Python host/reference/device owners |
+| Offline `PrismShellEvaluate` capture | **20 complete reference cases structurally accepted**, semantic scores deliberately unassigned |
+| PrismHost unit tests on iPhone 17 Pro simulator, iOS 26.5 / Xcode 26.5 (17F42) | **62 tests passed**, including native transcription/permission boundaries and timer notification race/restart tests |
+| Full native Home/Lens/Library/Settings XCUITest run | **5 UI journeys passed together with all 62 native tests**, one complete green Xcode run; all 12 scenes, five turns/relaunch, note receipts/undo, Library edit/share/delete, consent/blank and Developer Mode separation |
+| PrismHost Release build, generic iOS Simulator | **Build succeeded**, Apple SDK compilation; Debug acceptance ingress excluded |
+| PrismWatch direct target build, `-sdk watchsimulator` | **Build succeeded**, Apple Watch SDK compilation for applicable architectures |
+| PrismWatch scheme / generic Watch simulator destination | Blocked: Watch 26.5 platform components/runtime unavailable. Direct SDK build above is separate successful evidence; no Watch simulator execution claimed |
 | `git diff --check` | Passed |
-| Required PrismHost `xcodebuild test` | **Unavailable**, exit 127: `xcodebuild: command not found` |
-| Required PrismWatch `xcodebuild build` | **Unavailable**, exit 127: `xcodebuild: command not found` |
-| Live provider/model semantics | **Not run**; no provider spending authorized |
-| Native account effects | **Not run**; no actual Calendar/Reminders/account changes |
-| Physical Monocle/iPhone/Watch, audio routing, locked screen, BLE restoration, soak | **Not run**; devices/Apple platform unavailable |
+| Live provider/model semantics, actual Calendar/Reminders effects | **Not run**; no provider spending or personal account effects authorized |
+| Physical Monocle/iPhone/Watch, real audio routing, locked-screen, BLE restoration, notification delivery and soak | **Not run** |
 
-The installed Linux compiler used for these checks was official Swift 6.2.3 for Ubuntu 24.04, running the package's Swift 5 language/tools contract. The toolchain lives outside the repository. It does not provide Apple SDKs or simulators.
+Linux uses official Swift 6.2.3 for Ubuntu 24.04 in the package's Swift 5 language/tools contract. Apple checks use an isolated scratch extraction on the reachable Mac. Existing public/private Mac checkouts are untouched. No firmware install, hardware connect/scan, physical app install, reboot, account mutation or provider request was performed.
 
-## Executable coverage
+The earlier source receipt at `1831aba` had 114 Swift / 72 Python passes and no Apple execution. Continuation then reached the Mac. Its first native unit run found one legacy reserved-gesture diagnostic test failure (59/60); the reserved helper/diagnostic order were repaired, and the current native unit run passes. Intermediate UI runs exposed consent hit-target, accessibility selector, keyboard-dismissal and invalid-fixture issues; they are retained as historical failures in the private evidence packet. They are not retroactively called green. Xcode also emitted a nonfatal simctl diagnostics-collector PATH error after successful test execution; test result bundles and screenshot attachments were exported successfully.
 
-- Production semantic Responses adapter with safe HTTP-boundary replay, strict schema/domain validation, refusals, incomplete output and rejected mutation function calls.
-- Five-turn continuity and complete long-answer preservation through context, persistence, native projection and real framing/reassembly owners.
-- Audio byte conversion, transcript storage, independent speech/lens output, cancellation and late result rejection.
-- All 12 scene kinds, complete semantic paging, long words/Unicode, UTF-8 byte bounds, full text-box bounds, packing and overlap constraints.
-- Note preview/confirmation, project association, receipt, duplicate/stale acceptance rejection and undo; every pending action in a composed session/timer request survives earlier receipts.
-- Reminder journal, uncertain external effect, reconciliation and undo; a failed durable journal prevents native execution.
-- Focus timer, action review, expiry/completion and undo; expired actions cannot be revived by an error surface.
-- Calendar candidate mechanics plus AI-boundary interpretation replay, quiet output, snooze, expiry, source disappearance and restart duplicate suppression.
-- Privacy, retention of full content, raw-media policy, minimal external receipt ledger, corrupt-store preservation and interrupted-action recovery.
-- Watch version/session freshness and bounded canonical projection; no offline mutation queue.
-- Queue backpressure, coalescing, priority blank preserving a new Ask, connection epochs, protocol versions/size/sequence/total-length/time limits, audio request correlation, stale/duplicate gesture gate.
-- Actual Python kernel handshake, incremental microphone sender, signed byte integrity, MTU fragmentation, retry of an unsent control fragment, cancel, local blank, empty DRAW clearing, FIFO control/draw ordering, bounded inbound queue, late activation rejection after physical blank and offline lease. Only physical module boundaries are doubled.
-- Regressions for retained Oracle copy/history/paging/follow-up truth, full Vision OCR/summary, Babel transcripts beyond 24 lines and complete Teleprompter source/long words.
+A separate all-scene screen-capture run also passed. Visual export has an instrumentation limit: some app-window and screen captures intermittently omit otherwise stable chrome, while other frames (including timer/comparison) are complete. Raw captures are preserved privately. Automated journey/bounds passes are not a pixel-perfect visual signoff; reliable on-screen and physical visual acceptance remains open.
 
-Twenty full-content semantic reference scenarios are replayed inside one contract test, including actual read function rounds and supplied source/prior-turn context. They are **reference replay**, not twenty independent live model judgments. No semantic quality pass rate is claimed. New Apple-native service tests are included in the Host test target and remain unrun here.
+## Reproducible Apple commands
 
-## Scope boundaries
+Use an available iPhone simulator name (`xcrun simctl list devices available`). The project instruction's iPhone 16 was not installed; the actual destination used here was iPhone 17 Pro.
 
-Normal Home/Lens/Library/Settings, Developer Mode, Watch entry point, all 12 scene variants, all eight tools, protocol/media/persistence/provider owners and their consequential legacy truncation callers were inventoried. Apple compilation/UI behavior and all physical/live-account/model-quality acceptance remain unverified. Camera recovery, arbitrary generated UI/code, passive perception, unrestricted control, full legacy-app roadmaps and unrelated companion repositories are excluded by the assignment.
+```bash
+xcodebuild test -project ios/Apps/PrismHost/PrismHost.xcodeproj -scheme PrismHost \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -parallel-testing-enabled NO -jobs 2 CODE_SIGNING_ALLOWED=NO
+xcodebuild build -project ios/Apps/PrismHost/PrismHost.xcodeproj -scheme PrismHost \
+  -configuration Release -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
+xcodebuild build -project ios/Apps/PrismHost/PrismHost.xcodeproj -target PrismWatch \
+  -configuration Debug -sdk watchsimulator CODE_SIGNING_ALLOWED=NO
+```
 
-Run the exact Apple and physical acceptance sequence in [implementation status](ADAPTIVE_SHELL_IMPLEMENTATION.md#qualification-and-remaining-gates). Source, executable fixture, simulator, physical-device and live semantic evidence must remain separate.
+After installing the appropriate Watch simulator components, the requested Watch scheme destination can be exercised separately:
+
+```bash
+xcodebuild build -project ios/Apps/PrismHost/PrismHost.xcodeproj -scheme PrismWatch \
+  -destination 'platform=watchOS Simulator,name=Apple Watch SE 3 (40mm)' CODE_SIGNING_ALLOWED=NO
+```
+
+## Coverage and limits
+
+- Real Responses adapter and read-tool loop: malformed/unknown payloads, refusal/incomplete output, mutation-function rejection, host-receipt forgery rejection and complete context/tool results.
+- Five-turn continuity, long-answer persistence/relaunch, full transcripts, separate complete speech and glanceable projection, byte conversion, cancel/late results.
+- All 12 scene kinds, paging, Unicode/long words, UTF-8 byte and whole text-box bounds, pack/reassembly, queue backpressure/coalescing/priority blank, reconnect epochs, stale/duplicate gestures and audio correlation.
+- Notes, reminders, timer/session and conversational choices: exact preview, explicit confirmation, idempotent receipts, compound requests, undo ownership, durable external-effect/undo uncertainty, reconciliation and blank during native completion.
+- Proactive source identity/time/freshness, AI-boundary interpretation, quiet suppression, failed-evaluation cooldown, snooze/expiry/source disappearance and restart/reconnect deduplication.
+- Watch version/session/privacy/freshness and complete bounded action previews; no offline mutation queue.
+- Canonical retention, raw-media policy, minimal external ledger, corrupt-store preservation and interrupted process restoration.
+- Actual Python kernel handshake, bounded capture/streaming/retry, FIFO control/DRAW order, empty DRAW, cancellation, physical-blank barrier and offline lease, with only hardware module boundaries doubled.
+- Consequential legacy data-loss callers: complete Oracle copy/history/paging/follow-up, Vision summary/OCR, Babel beyond 24 lines and Teleprompter source/long words.
+
+The semantic set contains 20 fictional requests with complete source context, reference answers, speech, scenes, actions, expected reads and case-specific meaning-based rubrics. Offline replay and structural acceptance do **not** measure live model quality. The evaluation executable captures complete requests/plans and leaves semantic judgment to a separately identified reviewer; it never assigns token-presence scores or confirms effects.
+
+The inventoried surface is every normal phone tab, the Watch entry point, all 12 scene variants, all nine tools, transport/media/persistence/context/provider owners, consequential legacy truncation callers, test/project membership and current documentation entrypoints. Exclusions remain those in the assignment: camera recovery, arbitrary generated UI/code, passive perception, unrestricted control, full legacy-app roadmaps and unrelated companion repositories. Remaining real-device/account/model acceptance is listed in the [implementation status](ADAPTIVE_SHELL_IMPLEMENTATION.md#qualification-and-remaining-gates).

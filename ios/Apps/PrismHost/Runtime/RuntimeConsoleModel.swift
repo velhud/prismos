@@ -48,7 +48,7 @@ final class RuntimeConsoleModel: ObservableObject {
     }
 
     func sendReservedGesture() {
-        _ = coordinator.handleButton(ButtonEvent(side: .left, gesture: .doubleTap, durationMilliseconds: 160))
+        _ = coordinator.handleButton(ButtonEvent(side: .right, gesture: .doubleTap, durationMilliseconds: 160))
         refresh(notify: true)
     }
 

@@ -9,11 +9,11 @@ The iPhone owns Bluetooth, context, model requests, actions, persistence and ren
 - Typed or deliberately captured voice → context → structured `ExperiencePlan` → native scene → bounded binary DRAW.
 - Complete answers and transcripts in an atomic, protected local Library; separate spoken and glanceable lens responses.
 - Twelve trusted scene types: blank, activity, fact, list, comparison, choice, confirmation, progress, caption, timer, alert and route. Models cannot supply coordinates or executable UI.
-- Notes, search, EventKit reminders, calendar reads, optional authenticated agent exceptions, timers and session/project state. Mutations require an exact preview and confirmation, then produce receipts and undo where supported.
+- Notes, search, EventKit reminders, calendar reads, optional authenticated agent exceptions, timers, session/project state and conversational choices. Mutations require an exact preview and confirmation, then produce receipts and undo where supported.
 - Optional upcoming-calendar candidates interpreted by AI, with source, time, reason, expiry, dismiss, snooze and durable duplicate suppression.
 - Explicit remembered Monocle identity, CoreBluetooth restoration, fragmented writes, backpressure, media reconstruction, cancellation and an offline display lease.
 
-**Qualification:** the shared Swift runtime and Python device/reference tests execute on Linux. Apple adapter sources and platform tests are present, but this change has not been compiled with Xcode or exercised on an iPhone, Watch or Monocle. Reference scenario replay is not a live model quality score. See [implementation status](Documentation/ADAPTIVE_SHELL_IMPLEMENTATION.md) for the exact inventory, evidence classes and remaining acceptance gates.
+**Qualification:** 122 Swift package and 72 Python tests pass on Linux. Xcode 26.5 passes 62 native tests plus five complete iPhone simulator journeys; Release and Watch simulator SDK builds pass. Physical devices, real account effects and live model quality remain unverified. Reference scenario replay is not a live model quality score. See [implementation status](Documentation/ADAPTIVE_SHELL_IMPLEMENTATION.md) for the exact inventory, evidence classes and remaining acceptance gates.
 
 ## Setup
 
@@ -35,3 +35,5 @@ xcodebuild build -project ios/Apps/PrismHost/PrismHost.xcodeproj -scheme PrismWa
 ```
 
 Hardware verification and private identifiers must stay outside the public repository. Provider keys belong in Keychain or ignored environment files. The recovered private discussion is not part of this repository.
+
+Normal use: [Adaptive shell user guide](Documentation/ADAPTIVE_SHELL_USER_GUIDE.md).

@@ -51,7 +51,7 @@ import Combine
 
 /// Main-queue isolated CoreBluetooth owner. It never scans NUS, writes recovery commands, or selects by name.
 @MainActor
-final class CoreBluetoothMonocleAdapter: NSObject, ObservableObject, ShellDeviceLink, CBCentralManagerDelegate, CBPeripheralDelegate {
+final class CoreBluetoothMonocleAdapter: NSObject, ObservableObject, ShellDeviceLink, @preconcurrency CBCentralManagerDelegate, @preconcurrency CBPeripheralDelegate {
     struct Candidate: Identifiable {
         let id: UUID
         let label: String
@@ -102,6 +102,8 @@ final class CoreBluetoothMonocleAdapter: NSObject, ObservableObject, ShellDevice
     func role(for service: CBService) -> MonocleServiceRole { MonocleServiceClassifier().role(for: service.uuid.uuidString) }
     func discoverForPairing() {
         guard central.state == .poweredOn else { status = "Enable Bluetooth and allow access"; return }
+        if let active = peripheral { central.cancelPeripheralConnection(active) }
+        invalidateLink(); peripheral = nil
         stopped = false; pairing = true; candidates = []; peripherals = [:]
         phase = .scanning; status = "Select the identifier of your Monocle"; connectionDeadline = Date().addingTimeInterval(20)
         central.scanForPeripherals(withServices: scanServices(), options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])

@@ -1,6 +1,7 @@
 import Foundation
 import EventKit
 import AVFoundation
+import UserNotifications
 import PrismShell
 import PrismAI
 
@@ -128,5 +129,64 @@ final class NativeShellVoice: NSObject, ShellVoiceOutput, AVSpeechSynthesizerDel
     }
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         Task { @MainActor in guard !self.synthesizer.isSpeaking else { return }; self.state = "Silent"; self.onChange?(); try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation) }
+    }
+}
+
+@MainActor protocol TimerNotificationBoundary {
+    func requestAccess() async throws -> Bool
+    func authorized() async -> Bool
+    func cancel()
+    func schedule(_ timer: FocusTimer) async throws
+}
+@MainActor final class SystemTimerNotificationBoundary: TimerNotificationBoundary {
+    private let center = UNUserNotificationCenter.current()
+    private let identifier = "prismos.focus.current"
+    func requestAccess() async throws -> Bool { try await center.requestAuthorization(options: [.alert, .sound]) }
+    func authorized() async -> Bool {
+        let settings = await center.notificationSettings()
+        return [.authorized, .provisional, .ephemeral].contains(settings.authorizationStatus)
+    }
+    func cancel() { center.removePendingNotificationRequests(withIdentifiers: [identifier]) }
+    func schedule(_ timer: FocusTimer) async throws {
+        let content = UNMutableNotificationContent()
+        content.title = "Focus timer finished"; content.body = "Your PrismOS focus interval has ended."; content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, timer.end.timeIntervalSinceNow), repeats: false)
+        try await center.add(.init(identifier: identifier, content: content, trigger: trigger))
+    }
+}
+/// Optional OS delivery of the canonical focus timer; authorization is explicitly user-requested.
+/// Replacing a timer uses one stable notification slot, so undo/restart cannot duplicate alerts.
+@MainActor final class NativeTimerNotifications {
+    private let boundary: any TimerNotificationBoundary
+    private var desired: FocusTimer?
+    private var applied: FocusTimer?
+    private var updating = false
+    private var initialized = false
+    var enabled = true
+    private(set) var status = "Timer alerts require notification permission"
+    init(boundary: (any TimerNotificationBoundary)? = nil) { self.boundary = boundary ?? SystemTimerNotificationBoundary() }
+    func requestAccess() async throws -> Bool {
+        let granted = try await boundary.requestAccess()
+        status = granted ? "Timer alerts enabled" : "Timer alerts declined; timers still run in PrismOS"
+        initialized = false; await synchronize(desired)
+        return granted
+    }
+    func synchronize(_ timer: FocusTimer?) async {
+        guard enabled else { return }
+        desired = timer
+        guard !updating else { return }
+        updating = true; defer { updating = false }
+        repeat {
+            let target = desired
+            if initialized && target == applied { return }
+            initialized = true; boundary.cancel()
+            if let target, !target.completed, target.end > Date() {
+                if await boundary.authorized() {
+                    do { try await boundary.schedule(target); status = "Timer alert scheduled" }
+                    catch { status = "Timer is active; its notification could not be scheduled" }
+                } else { status = "Timer active; allow notifications for background alerts" }
+            }
+            applied = target
+        } while desired != applied
     }
 }

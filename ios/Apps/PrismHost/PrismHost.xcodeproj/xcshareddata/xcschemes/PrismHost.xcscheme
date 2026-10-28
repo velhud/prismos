@@ -38,6 +38,9 @@
                ReferencedContainer = "container:PrismHost.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference skipped="NO">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="510000000000000000000012" BuildableName="PrismHostUITests.xctest" BlueprintName="PrismHostUITests" ReferencedContainer="container:PrismHost.xcodeproj" />
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

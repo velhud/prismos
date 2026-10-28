@@ -5,6 +5,6 @@ import SwiftUI
 struct PrismHostApp: App {
     @StateObject private var host = ShellHostModel()
     var body: some Scene {
-        WindowGroup { PrismShellView().environmentObject(host) }
+        WindowGroup { PrismShellView().environmentObject(host).defaultAppStorage(host.preferences) }
     }
 }

@@ -41,6 +41,7 @@ public struct ToolDescriptor: Codable, Equatable, Sendable {
         .init(name: .agentStatus, purpose: "Read authenticated agent exception snapshot when configured", requiresConfirmation: false, supportsUndo: false),
         .init(name: .startTimer, purpose: "Start a bounded focus timer", requiresConfirmation: true, supportsUndo: true),
         .init(name: .stopTimer, purpose: "Stop current focus timer", requiresConfirmation: true, supportsUndo: true),
+        .init(name: .continueConversation, purpose: "Continue with a user-selected semantic option using its exact query", requiresConfirmation: true, supportsUndo: false),
         .init(name: .setSession, purpose: "Set active session kind and project", requiresConfirmation: true, supportsUndo: true)
     ]
 }
@@ -97,8 +98,9 @@ public struct CandidateHistory: Codable, Equatable, Sendable {
     public var expiresAt: Date
     public var snoozedUntil: Date?
     public var interpretation: String?
-    public init(state: State, expiresAt: Date, snoozedUntil: Date? = nil, interpretation: String? = nil) {
-        self.state = state; self.expiresAt = expiresAt; self.snoozedUntil = snoozedUntil; self.interpretation = interpretation
+    public var evaluatedAt: Date?
+    public init(state: State, expiresAt: Date, snoozedUntil: Date? = nil, interpretation: String? = nil, evaluatedAt: Date? = nil) {
+        self.state = state; self.expiresAt = expiresAt; self.snoozedUntil = snoozedUntil; self.interpretation = interpretation; self.evaluatedAt = evaluatedAt
     }
 }
 public protocol ProactiveSource {

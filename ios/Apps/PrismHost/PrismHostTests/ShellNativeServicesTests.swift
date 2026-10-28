@@ -41,3 +41,35 @@ final class ShellNativeServicesTests: XCTestCase {
         let bodies = await http.bodies; XCTAssertTrue(bodies.isEmpty)
     }
 }
+
+@MainActor private final class NotificationBoundaryDouble: TimerNotificationBoundary {
+    var allowed = true
+    var prompts = 0
+    var cancels = 0
+    var pending: FocusTimer?
+    var onSchedule: (() async -> Void)?
+    func requestAccess() async throws -> Bool { prompts += 1; return allowed }
+    func authorized() async -> Bool { allowed }
+    func cancel() { pending = nil; cancels += 1 }
+    func schedule(_ timer: FocusTimer) async throws { await onSchedule?(); pending = timer }
+}
+extension ShellNativeServicesTests {
+    @MainActor func testTimerRestorationClearsOrphanAndNeverPromptsImplicitly() async throws {
+        let boundary = NotificationBoundaryDouble()
+        boundary.pending = FocusTimer(id:"orphan",title:"Old",end:Date().addingTimeInterval(90))
+        let scheduler = NativeTimerNotifications(boundary:boundary)
+        await scheduler.synchronize(nil)
+        XCTAssertNil(boundary.pending); XCTAssertEqual(boundary.prompts,0)
+        boundary.allowed = false
+        await scheduler.synchronize(.init(id:"new",title:"Focus",end:Date().addingTimeInterval(60)))
+        XCTAssertNil(boundary.pending); XCTAssertEqual(boundary.prompts,0)
+        XCTAssertTrue(scheduler.status.contains("allow notifications"))
+    }
+    @MainActor func testTimerUndoDuringSuspendedSchedulingConvergesToCanonicalState() async {
+        let boundary = NotificationBoundaryDouble(); let scheduler = NativeTimerNotifications(boundary:boundary)
+        boundary.onSchedule = { await scheduler.synchronize(nil) }
+        await scheduler.synchronize(.init(id:"new",title:"Focus",end:Date().addingTimeInterval(60)))
+        XCTAssertNil(boundary.pending); XCTAssertEqual(boundary.cancels,2)
+        XCTAssertEqual(boundary.prompts,0)
+    }
+}

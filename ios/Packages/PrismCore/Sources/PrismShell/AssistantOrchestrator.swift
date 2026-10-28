@@ -38,6 +38,9 @@ import PrismDraw
         for i in archive.receipts.indices where archive.receipts[i].status == .executing {
             archive.receipts[i].status = .uncertain; archive.receipts[i].summary = "Interrupted action; reconcile before retrying"
         }
+        for i in archive.receipts.indices where archive.receipts[i].status == .undoing {
+            archive.receipts[i].status = .undoUncertain; archive.receipts[i].summary = "Interrupted undo; reconcile before retrying"
+        }
         for i in archive.conversations.indices where archive.conversations[i].status == "pending" { archive.conversations[i].status = "interrupted" }
         try repository.save(archive)
     }
@@ -52,7 +55,7 @@ import PrismDraw
     }
     public var selectedAction: ProposedAction? { actions.isEmpty ? nil : actions[min(selectedActionIndex, actions.count - 1)] }
     public func nextChoice() {
-        guard !actions.isEmpty, let turn = currentRecord?.turn else { return }
+        guard activeRequestID == nil, expiresAt.map({ $0 > now() }) == true, !actions.isEmpty, let turn = currentRecord?.turn else { return }
         selectedActionIndex = (selectedActionIndex + 1) % actions.count
         reviewedActionID = nil; scene = turn.lensScene; pageIndex = 0; expiresAt = now().addingTimeInterval(120); changed()
     }
@@ -213,7 +216,7 @@ import PrismDraw
             if let i = a.conversations.firstIndex(where: { $0.id == id }) { a.conversations[i].turn = turn; a.conversations[i].status = "completed" }
             else { a.conversations.append(.init(id: id, sessionID: a.session.id, userText: userText, turn: turn,
                                                provenance: .init(source: source, provider: model.providerID, requestID: id, createdAt: now()), status: "completed")) }
-            if let project = turn.project { a.session.project = project }
+            if let project = turn.project, project != a.session.project { a.session.project = project; a.sessionMutationID = "inferred:" + id.uuidString }
             a.artifacts.append(.init(sessionID: a.session.id, kind: .answer, title: String(userText.prefix(160)), body: turn.canonicalAnswer,
                                      project: a.session.project, provenance: .init(source: source, provider: model.providerID, requestID: id, createdAt: now()), expiresAt: retentionEnd))
             for m in turn.artifacts {
@@ -235,6 +238,12 @@ import PrismDraw
             return // Never execute a duplicate, including an undone action.
         }
         guard action.tool.mutates else { throw ShellError.invalid("Read tools are performed by the assistant") }
+        if action.tool == .continueConversation {
+            let receipt = ActionReceipt(id: key, requestID: record.id, action: action, status: .succeeded, summary: "Selected: " + action.summary, createdAt: now())
+            try transaction { $0.receipts.append(receipt); appendReceiptArtifact(receipt, to: &$0) }
+            submit(action.arguments.query!)
+            return
+        }
         mutationInFlight = true; defer { mutationInFlight = false }
         let actionGeneration = generation
         var receipt = ActionReceipt(id: key, requestID: record.id, action: action, status: .succeeded, summary: action.summary, createdAt: now())
@@ -263,12 +272,12 @@ import PrismDraw
                                              provenance: .init(source: "confirmed note", requestID: record.id, createdAt: now()), expiresAt: retentionEnd))
                     receipt.summary = "Note saved: \(action.arguments.title!)"
                 case .startTimer:
-                    receipt.previousTimer = a.timer
+                    receipt.previousTimer = a.timer; receipt.previousTimerMutationID = a.timerMutationID; a.timerMutationID = key
                     a.timer = .init(id: key, title: action.arguments.title!, end: now().addingTimeInterval(Double(action.arguments.seconds!)))
                     receipt.undoToken = key; receipt.summary = "Timer started: \(action.arguments.title!)"
-                case .stopTimer: receipt.previousTimer = a.timer; a.timer = nil; receipt.undoToken = key; receipt.summary = "Timer stopped"
+                case .stopTimer: receipt.previousTimer = a.timer; receipt.previousTimerMutationID = a.timerMutationID; a.timerMutationID = key; a.timer = nil; receipt.undoToken = key; receipt.summary = "Timer stopped"
                 case .setSession:
-                    receipt.previousSession = a.session; a.session.kind = action.arguments.sessionKind!; a.session.project = action.arguments.project ?? a.session.project
+                    receipt.previousSession = a.session; receipt.previousSessionMutationID = a.sessionMutationID; a.sessionMutationID = key; a.session.kind = action.arguments.sessionKind!; a.session.project = action.arguments.project ?? a.session.project
                     receipt.undoToken = key; receipt.summary = "Session updated"
                 default: throw ShellError.invalid("Unsupported mutation")
                 }
@@ -284,41 +293,66 @@ import PrismDraw
                                       project: archive.session.project, provenance: .init(source: "host action executor", requestID: receipt.requestID, createdAt: now()), expiresAt: retentionEnd))
     }
     public func reconcile(receiptID: String) async throws {
-        guard !mutationInFlight, let i = archive.receipts.firstIndex(where: { $0.id == receiptID }),
-              archive.receipts[i].status == .uncertain, archive.receipts[i].action.tool == .createReminder else { throw ShellError.stale }
+        guard !mutationInFlight, let receipt = archive.receipts.first(where: { $0.id == receiptID }),
+              [.uncertain, .undoUncertain].contains(receipt.status), receipt.action.tool == .createReminder else { throw ShellError.stale }
         mutationInFlight = true; defer { mutationInFlight = false }
+        let token = generation
         let found = try await native.findReminder(idempotencyKey: receiptID)
         try transaction { a in
-            a.receipts[i].status = found == nil ? .failed : .succeeded
-            a.receipts[i].externalID = found; a.receipts[i].undoToken = found == nil ? nil : receiptID
-            a.receipts[i].summary = found == nil ? "No matching reminder found. Ask again to propose a new action." : "Reminder creation reconciled"
+            guard let index = a.receipts.firstIndex(where: { $0.id == receiptID }) else { throw ShellError.stale }
+            let isUndo = receipt.status == .undoUncertain
+            a.receipts[index].status = isUndo ? (found == nil ? .undone : .succeeded) : (found == nil ? .failed : .succeeded)
+            a.receipts[index].externalID = found
+            a.receipts[index].undoToken = found == nil ? nil : receiptID
+            a.receipts[index].summary = isUndo ? (found == nil ? "Reminder undo reconciled" : "Reminder still exists; undo was not confirmed") : (found == nil ? "No matching reminder found. Ask again to propose a new action." : "Reminder creation reconciled")
+            appendReceiptArtifact(a.receipts[index], to: &a)
         }
-        showReceipt(archive.receipts[i])
+        if token == generation, let result = archive.receipts.first(where: { $0.id == receiptID }) { showReceipt(result) }
+        else { changed() }
     }
     public func undo(receiptID: String) async throws {
-        guard !mutationInFlight, let i = archive.receipts.firstIndex(where: { $0.id == receiptID }),
-              archive.receipts[i].status == .succeeded, archive.receipts[i].undoToken != nil else { throw ShellError.stale }
+        guard !mutationInFlight, let receipt = archive.receipts.first(where: { $0.id == receiptID }),
+              receipt.status == .succeeded, receipt.undoToken != nil else { throw ShellError.stale }
         mutationInFlight = true; defer { mutationInFlight = false }
-        let receipt = archive.receipts[i]
+        let token = generation
         if receipt.action.tool == .createReminder {
             guard let external = receipt.externalID else { throw ShellError.uncertain }
-            try await native.undoReminder(externalID: external, idempotencyKey: receipt.id)
+            try transaction { a in
+                guard let index = a.receipts.firstIndex(where: { $0.id == receiptID }) else { throw ShellError.stale }
+                a.receipts[index].status = .undoing; a.receipts[index].summary = "Undoing reminder"
+            }
+            changed()
+            do { try await native.undoReminder(externalID: external, idempotencyKey: receipt.id) }
+            catch {
+                try transaction { a in
+                    guard let index = a.receipts.firstIndex(where: { $0.id == receiptID }) else { throw ShellError.stale }
+                    a.receipts[index].status = .undoUncertain; a.receipts[index].summary = "Undo outcome unconfirmed; reconcile before retrying"
+                    appendReceiptArtifact(a.receipts[index], to: &a)
+                }
+                if token == generation, let result = archive.receipts.first(where: { $0.id == receiptID }) { showReceipt(result) }
+                else { changed() }
+                return
+            }
         }
         try transaction { a in
+            guard let index = a.receipts.firstIndex(where: { $0.id == receiptID }) else { throw ShellError.stale }
             switch receipt.action.tool {
             case .saveNote:
                 if let note = a.artifacts.first(where: { $0.id.uuidString == receipt.externalID }), note.provenance.source == "user edited note" { throw ShellError.denied("The note was edited; delete it explicitly in Library") }
                 a.artifacts.removeAll { $0.id.uuidString == receipt.externalID }
-            case .startTimer:
-                guard a.timer?.id == receipt.id || a.timer == nil else { throw ShellError.stale }; a.timer = receipt.previousTimer
-            case .stopTimer: guard a.timer == nil else { throw ShellError.stale }; a.timer = receipt.previousTimer
-            case .setSession: guard let prior = receipt.previousSession, a.session.id == prior.id else { throw ShellError.stale }; a.session = prior
+            case .startTimer, .stopTimer:
+                guard a.timerMutationID == receipt.id else { throw ShellError.stale }
+                a.timer = receipt.previousTimer; a.timerMutationID = receipt.previousTimerMutationID
+            case .setSession:
+                guard a.sessionMutationID == receipt.id, let prior = receipt.previousSession, a.session.id == prior.id else { throw ShellError.stale }
+                a.session = prior; a.sessionMutationID = receipt.previousSessionMutationID
             default: break
             }
-            a.receipts[i].status = .undone; a.receipts[i].undoToken = nil; a.receipts[i].summary = "Undone: \(receipt.action.summary)"
-            appendReceiptArtifact(a.receipts[i], to: &a)
+            a.receipts[index].status = .undone; a.receipts[index].undoToken = nil; a.receipts[index].summary = "Undone: \(receipt.action.summary)"
+            appendReceiptArtifact(a.receipts[index], to: &a)
         }
-        showReceipt(archive.receipts[i])
+        if token == generation, let result = archive.receipts.first(where: { $0.id == receiptID }) { showReceipt(result) }
+        else { changed() }
     }
     private func showReceipt(_ receipt: ActionReceipt) {
         reviewedActionID = nil
@@ -341,26 +375,31 @@ import PrismDraw
               !archive.privacy.privateMode, now().timeIntervalSince(archive.lastInterruptionAt ?? .distantPast) >= 60 else { return }
         let candidates = CalendarProactiveSource().candidates(snapshot: sources, now: now()).filter { c in
             guard let history = archive.candidateHistory[c.id] else { return true }
-            return history.state == .snoozed && (history.snoozedUntil ?? .distantFuture) <= now()
+            if history.state == .snoozed { return (history.snoozedUntil ?? .distantFuture) <= now() }
+            // Failed/cancelled evaluations may retry after a mechanical cooldown; successful decisions stay quiet.
+            return history.state == .evaluated && now().timeIntervalSince(history.evaluatedAt ?? .distantPast) >= 60
         }
         guard !candidates.isEmpty else { return }
         candidateEvaluation = true; defer { candidateEvaluation = false }
         let token = generation; let id = UUID()
         do {
-            try transaction { a in for c in candidates { a.candidateHistory[c.id] = .init(state: .evaluated, expiresAt: c.expiresAt) } }
+            try transaction { a in for c in candidates { a.candidateHistory[c.id] = .init(state: .evaluated, expiresAt: c.expiresAt, evaluatedAt: now()) } }
             let context = ContextBundle.assemble(archive: archive, sources: sources, connected: connected, now: now())
             let plan = try await compose(.init(id: id, input: "Interpret these real event candidates in context; decide whether any merits a temporary surface now.", context: context, candidates: candidates), token: token)
             try check(token); try plan.validate(now: now())
             guard let decision = plan.turn.proactiveDecision, !decision.reason.isEmpty,
                   let candidate = candidates.first(where: { $0.id == decision.candidateID }), candidate.expiresAt > now(),
                   CalendarProactiveSource().candidates(snapshot: sources, now: now()).contains(where: { $0.id == candidate.id }),
-                  plan.turn.proposedActions.isEmpty else { throw ShellError.stale }
+                  plan.turn.proposedActions.isEmpty, decision.disposition != .show || plan.turn.lensScene.kind != .blank else { throw ShellError.stale }
             try transaction { a in
+                // The AI evaluated the whole batch. Do not repeatedly ask about unselected candidates.
+                for c in candidates { a.candidateHistory[c.id] = .init(state: .suppressed, expiresAt: c.expiresAt, interpretation: "Not selected in this contextual evaluation", evaluatedAt: now()) }
                 a.candidateHistory[candidate.id] = .init(state: decision.disposition == .show ? .shown : .suppressed, expiresAt: candidate.expiresAt, interpretation: decision.reason)
                 if decision.disposition == .show { a.lastInterruptionAt = now() }
                 a.artifacts.append(.init(sessionID: a.session.id, kind: .event, title: candidate.source, body: plan.turn.canonicalAnswer,
-                                         project: a.session.project, provenance: .init(source: candidate.source, provider: model.providerID, requestID: id, createdAt: now()), expiresAt: candidate.expiresAt))
+                                         project: a.session.project, provenance: .init(source: candidate.source, provider: model.providerID, requestID: id, createdAt: now()), expiresAt: candidate.expiresAt, candidate: candidate))
             }
+            lastError = nil
             if decision.disposition == .show {
                 scene = plan.turn.lensScene; activeCandidate = candidate; phase = "Now"; pageIndex = 0
                 expiresAt = min(candidate.expiresAt, now().addingTimeInterval(Double(scene.expiresInSeconds))); changed()
@@ -375,11 +414,11 @@ import PrismDraw
         clear()
     }
     public func reviewOrConfirm(actionID: String) async throws {
-        guard let action = actions.first(where: { $0.id == actionID }), activeRequestID == nil else { throw ShellError.stale }
+        guard !mutationInFlight, let action = actions.first(where: { $0.id == actionID }), activeRequestID == nil, expiresAt.map({ $0 > now() }) == true else { throw ShellError.stale }
         if reviewedActionID != actionID {
             reviewedActionID = actionID
             let a = action.arguments
-            var details = [action.summary, a.title, a.body, a.project.map { "Project: " + $0 }, a.topic.map { "Topic: " + $0 }].compactMap { $0 }
+            var details = [action.summary, a.title, a.body, a.query, a.project.map { "Project: " + $0 }, a.topic.map { "Topic: " + $0 }].compactMap { $0 }
             if let due = a.dueAt { details.append(due.formatted(date: .complete, time: .shortened)) }
             if let seconds = a.seconds { details.append("Duration: \(seconds) seconds") }
             if let kind = a.sessionKind { details.append("Session: " + kind.rawValue) }
@@ -391,16 +430,36 @@ import PrismDraw
         try await confirm(actionID: actionID, revision: archive.revision)
     }
     public func tick() {
-        if now().timeIntervalSince(lastPrunedAt) >= 3600 {
+        if !mutationInFlight && now().timeIntervalSince(lastPrunedAt) >= 3600 {
             do { try transaction { $0.prune(now: now()) }; lastPrunedAt = now() } catch { showError(error) }
         }
-        if let expiresAt, expiresAt <= now(), !pinned || activeRequestID != nil { clear() }
+        if let expiresAt, expiresAt <= now(), !pinned || activeRequestID != nil || !actions.isEmpty { clear() }
         if let c = activeCandidate, c.expiresAt <= now() { clear() }
         if var timer = archive.timer, timer.end <= now(), !timer.completed {
             timer.completed = true
             do { try transaction { $0.timer = timer }; changed() } catch { showError(error) }
         }
         if scene.kind == .timer { changed(incrementRevision: false) }
+    }
+    public var isReviewingAction: Bool { reviewedActionID != nil }
+    public func handleGesture(side: String, gesture: String) async throws {
+        switch (side, gesture) {
+        case ("L", "LONG"): clear()
+        case ("R", "DOUBLE"), ("R", "LONG"): beginListening()
+        case ("L", "DOUBLE"): togglePin()
+        case ("L", "TAP"):
+            if reviewedActionID != nil {
+                reviewedActionID = nil; pageIndex = 0; scene = currentRecord?.turn?.lensScene ?? .blank; changed()
+            } else if activeCandidate != nil { try dismissCandidate() }
+            else if actions.count > 1 { nextChoice() }
+            else if let receipt = lastReceipt, receipt.status == .succeeded, receipt.undoToken != nil, scene.kind == .confirmation { try await undo(receiptID: receipt.id) }
+            else { clear() }
+        case ("R", "TAP"):
+            if let action = selectedAction { try await reviewOrConfirm(actionID: action.id) }
+            else if scene.kind == .blank { beginListening() }
+            else { nextPage() }
+        default: break
+        }
     }
     public func nextPage() { pageIndex += 1; let count = PrismSceneRenderer.pages(scene, now: now()).count; if pageIndex >= count { pageIndex = 0 }; changed() }
     public func togglePin() { guard activeRequestID == nil && activeCandidate == nil && scene.kind != .blank else { return }; pinned.toggle(); changed() }
@@ -424,7 +483,7 @@ import PrismDraw
             a.artifacts = []; a.conversations = []; a.sessions = []; a.session = AssistantSession()
             a.timer = nil; a.candidateHistory = [:]
             // Preserve minimal external-effect ledger to prevent duplicate effects and retain undo.
-            a.receipts = a.receipts.filter { $0.action.tool == .createReminder && [.uncertain,.executing,.succeeded].contains($0.status) }
+            a.receipts = a.receipts.filter { $0.action.tool == .createReminder && [.uncertain,.executing,.succeeded,.undoing,.undoUncertain].contains($0.status) }
             for i in a.receipts.indices {
                 a.receipts[i].action.arguments = .init()
                 a.receipts[i].action.summary = "Reminder action"; a.receipts[i].summary = "Reminder receipt retained for undo and reconciliation"

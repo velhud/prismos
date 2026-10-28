@@ -23,12 +23,13 @@ public struct LibraryArtifact: Codable, Equatable, Identifiable, Sendable {
     public var sensitivity: Sensitivity
     public var expiresAt: Date?
     public var rawMedia: Data?
+    public var candidate: ProactiveCandidate?
     public init(id: UUID = UUID(), sessionID: UUID, kind: ArtifactKind, title: String, body: String,
                 project: String? = nil, topic: String? = nil, provenance: Provenance, sensitivity: Sensitivity = .personal,
-                expiresAt: Date? = nil, rawMedia: Data? = nil) {
+                expiresAt: Date? = nil, rawMedia: Data? = nil, candidate: ProactiveCandidate? = nil) {
         self.id = id; self.sessionID = sessionID; self.kind = kind; self.title = title; self.body = body
         self.project = project; self.topic = topic; self.provenance = provenance; self.sensitivity = sensitivity
-        self.expiresAt = expiresAt; self.rawMedia = rawMedia
+        self.expiresAt = expiresAt; self.rawMedia = rawMedia; self.candidate = candidate
     }
 }
 public struct ConversationRecord: Codable, Equatable, Identifiable, Sendable {
@@ -67,7 +68,7 @@ public struct PrivacySettings: Codable, Equatable, Sendable {
     public var retentionDays = 30
     public init() {}
 }
-public enum ReceiptStatus: String, Codable, Sendable { case executing, succeeded, failed, uncertain, undone }
+public enum ReceiptStatus: String, Codable, Sendable { case executing, succeeded, failed, uncertain, undoing, undoUncertain, undone }
 public struct ActionReceipt: Codable, Equatable, Identifiable, Sendable {
     public var id: String
     public var requestID: UUID
@@ -79,6 +80,8 @@ public struct ActionReceipt: Codable, Equatable, Identifiable, Sendable {
     public var createdAt: Date
     public var previousSession: AssistantSession?
     public var previousTimer: FocusTimer?
+    public var previousTimerMutationID: String?
+    public var previousSessionMutationID: String?
     public init(id: String, requestID: UUID, action: ProposedAction, status: ReceiptStatus, summary: String, createdAt: Date) {
         self.id = id; self.requestID = requestID; self.action = action; self.status = status; self.summary = summary; self.createdAt = createdAt
     }
@@ -91,6 +94,8 @@ public struct ShellArchive: Codable, Equatable, Sendable {
     public var artifacts: [LibraryArtifact] = []
     public var receipts: [ActionReceipt] = []
     public var timer: FocusTimer?
+    public var timerMutationID: String?
+    public var sessionMutationID: String?
     public var privacy = PrivacySettings()
     public var candidateHistory: [String: CandidateHistory] = [:]
     public var lastInterruptionAt: Date?
@@ -102,7 +107,7 @@ public struct ShellArchive: Codable, Equatable, Sendable {
         artifacts.removeAll { ($0.expiresAt.map { $0 <= now } ?? false) || $0.provenance.createdAt < cutoff }
         conversations.removeAll { $0.provenance.createdAt < cutoff }
         // Receipts retain identifiers through the policy window; never silently retry an uncertain external effect.
-        receipts.removeAll { $0.createdAt < cutoff && ($0.action.tool != .createReminder || [.failed, .undone].contains($0.status)) }
+        receipts.removeAll { $0.createdAt < cutoff && ![.executing, .uncertain, .undoing, .undoUncertain].contains($0.status) && ($0.action.tool != .createReminder || [.failed, .undone].contains($0.status)) }
         for i in receipts.indices where receipts[i].createdAt < cutoff {
             receipts[i].action.arguments = .init(); receipts[i].action.summary = "Reminder action"
             receipts[i].summary = "Reminder receipt retained for undo and reconciliation"

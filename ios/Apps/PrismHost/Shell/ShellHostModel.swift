@@ -6,9 +6,11 @@ import PrismAI
 
 @MainActor
 final class ShellHostModel: ObservableObject {
+    let preferences: UserDefaults
     let link: CoreBluetoothMonocleAdapter
     let native: EventKitShellTools
     let voice: NativeShellVoice
+    let timerNotifications = NativeTimerNotifications()
     @Published private(set) var engine: AssistantOrchestrator?
     @Published private(set) var startupError: String?
     private var watch: ShellPhoneWatchBridge?
@@ -19,17 +21,38 @@ final class ShellHostModel: ObservableObject {
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     private let secrets = KeychainSecretStore()
     init() {
-        link = CoreBluetoothMonocleAdapter(); native = EventKitShellTools(); voice = NativeShellVoice()
+        #if DEBUG
+        let acceptance = ShellAcceptanceConfiguration.fromEnvironment()
+        preferences = acceptance?.preferences ?? .standard
+        #else
+        preferences = .standard
+        #endif
+        link = CoreBluetoothMonocleAdapter(defaults: preferences); native = EventKitShellTools(); voice = NativeShellVoice()
         do {
             let directory = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            let repository = FileShellRepository(url: directory.appendingPathComponent("PrismShell/library-v1.json"))
+            var libraryURL = directory.appendingPathComponent("PrismShell/library-v1.json")
+            #if DEBUG
+            if acceptance != nil { timerNotifications.enabled = false }
+            if let acceptance { libraryURL = directory.appendingPathComponent("PrismAcceptance/" + acceptance.id.uuidString + "/library-v1.json") }
+            #endif
+            let repository = FileShellRepository(url: libraryURL)
             let secretStore = secrets
-            let model = ResponsesExperienceModel(model: OpenAIServiceConfiguration.defaultTextModel, apiKey: { try secretStore.read("openai.api_key") })
-            let runtime = try AssistantOrchestrator(repository: repository, model: model, native: native, link: link, voice: voice)
+            var model = ResponsesExperienceModel(model: OpenAIServiceConfiguration.defaultTextModel, apiKey: { try secretStore.read("openai.api_key") })
+            var effects: any NativeToolBoundary = native
+            var output: any ShellVoiceOutput = voice
+            #if DEBUG
+            if let acceptance {
+                model = ResponsesExperienceModel(model: "acceptance-fixture", apiKey: { "fixture-not-a-credential" }, transport: ShellAcceptanceHTTP(plans: acceptance.plans))
+                effects = ShellAcceptanceOS(); output = ShellAcceptanceVoice()
+            }
+            #endif
+            let runtime = try AssistantOrchestrator(repository: repository, model: model, native: effects, link: link, voice: output)
             engine = runtime
+            Task { await timerNotifications.synchronize(runtime.archive.timer) }
             watch = ShellPhoneWatchBridge(engine: runtime)
             runtime.onChange = { [weak self] in
                 self?.objectWillChange.send(); self?.watch?.publish(); self?.syncBackgroundLease()
+                if let self { Task { await self.timerNotifications.synchronize(self.engine?.archive.timer) } }
             }
             link.onConnection = { [weak runtime] connected in runtime?.setConnection(connected) }
             link.onGesture = { [weak self] side, gesture in self?.gesture(side: side, gesture: gesture) }
@@ -66,23 +89,9 @@ final class ShellHostModel: ObservableObject {
     }
     func gesture(side: String, gesture: String) {
         guard let engine else { return }
-        switch (side, gesture) {
-        case ("L", "LONG"): engine.clear()
-        case ("R", "DOUBLE"), ("R", "LONG"): engine.beginListening()
-        case ("L", "DOUBLE"): engine.togglePin()
-        case ("L", "TAP"):
-            if let receipt = engine.lastReceipt, receipt.status == .succeeded, receipt.undoToken != nil, engine.scene.kind == .confirmation {
-                perform { try await engine.undo(receiptID: receipt.id) }
-            } else if engine.actions.count > 1 { engine.nextChoice() }
-            else { perform { try engine.dismissCandidate() } }
-        case ("R", "TAP"):
-            if let action = engine.selectedAction {
-                perform { try await engine.reviewOrConfirm(actionID: action.id) }
-            } else if engine.scene.kind == .blank { engine.beginListening() }
-            else { engine.nextPage() }
-        default: break
-        }
+        perform { try await engine.handleGesture(side: side, gesture: gesture) }
     }
+
     func perform(_ operation: @escaping @MainActor () async throws -> Void) {
         Task { do { try await operation() } catch { engine?.showError(error) }; syncBackgroundLease() }
     }

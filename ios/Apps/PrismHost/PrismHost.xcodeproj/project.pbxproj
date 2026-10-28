@@ -50,6 +50,9 @@
 		300000000000000000000611 /* PrismShell in Frameworks */ = {isa = PBXBuildFile; productRef = 400000000000000000000601; };
 		300000000000000000000612 /* PrismShell in Frameworks */ = {isa = PBXBuildFile; productRef = 400000000000000000000601; };
 		300000000000000000000604 /* ShellNativeServicesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000604; };
+        510000000000000000000001 = {isa = PBXBuildFile; fileRef = 510000000000000000000002; };
+        510000000000000000000003 = {isa = PBXBuildFile; productRef = 400000000000000000000601; };
+        510000000000000000000004 = {isa = PBXBuildFile; fileRef = 510000000000000000000005; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +63,7 @@
 			remoteGlobalIDString = 100000000000000000000300;
 			remoteInfo = PrismHost;
 		};
+        510000000000000000000007 = {isa = PBXContainerItemProxy; containerPortal = 100000000000000000000200; proxyType = 1; remoteGlobalIDString = 100000000000000000000300; remoteInfo = PrismHost; };
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +105,9 @@
 		200000000000000000000602 /* NativeShellServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Shell/NativeShellServices.swift"; sourceTree = "<group>"; };
 		200000000000000000000603 /* PrismShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Shell/PrismShellView.swift"; sourceTree = "<group>"; };
 		200000000000000000000604 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismHostTests/ShellNativeServicesTests.swift; sourceTree = "<group>"; };
+        510000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrismHostUITests/AdaptiveShellUITests.swift; sourceTree = "<group>"; };
+        510000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell/ShellAcceptanceSupport.swift; sourceTree = "<group>"; };
+        510000000000000000000006 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = PrismHostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +117,7 @@
 				300000000000000000000612 /* PrismShell in Frameworks */,10000000000000000000002B /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
 		100000000000000000000222 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
 				300000000000000000000611 /* PrismShell in Frameworks */,10000000000000000000002A /* PrismWatchModels in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+        510000000000000000000010 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (510000000000000000000003,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -126,6 +134,8 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000101 /* PrismHostApp.swift */,
+                510000000000000000000002,
+                510000000000000000000005,
 				200000000000000000000603 /* PrismShellView.swift */,
 				200000000000000000000602 /* NativeShellServices.swift */,
 				200000000000000000000601 /* ShellHostModel.swift */,
@@ -192,6 +202,7 @@
 			children = (
 				100000000000000000000108 /* PrismHost.app */,
 				100000000000000000000109 /* PrismHostTests.xctest */,
+                510000000000000000000006,
 				100000000000000000000122 /* PrismWatch.app */,
 			);
 			name = Products;
@@ -262,6 +273,18 @@
 			productReference = 100000000000000000000122 /* PrismWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
+        510000000000000000000012 /* PrismHostUITests */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = 510000000000000000000013;
+            buildPhases = (510000000000000000000009,510000000000000000000010,510000000000000000000011,);
+            buildRules = ();
+            dependencies = (510000000000000000000008,);
+            name = PrismHostUITests;
+            packageProductDependencies = (400000000000000000000601,);
+            productName = PrismHostUITests;
+            productReference = 510000000000000000000006;
+            productType = "com.apple.product-type.bundle.ui-testing";
+        };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -300,6 +323,7 @@
 				100000000000000000000300 /* PrismHost */,
 				100000000000000000000310 /* PrismHostTests */,
 				100000000000000000000320 /* PrismWatch */,
+                510000000000000000000012 /* PrismHostUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -308,6 +332,7 @@
 		100000000000000000000302 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000019 /* Assets.xcassets in Resources */, 10000000000000000000001A /* AppIcon60x60@2x.png in Resources */, 10000000000000000000001B /* AppIcon60x60@3x.png in Resources */, 10000000000000000000001C /* AppIcon76x76.png in Resources */, 10000000000000000000001D /* AppIcon76x76@2x.png in Resources */, 10000000000000000000001E /* AppIcon83.5x83.5@2x.png in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 		100000000000000000000312 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		100000000000000000000323 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+        510000000000000000000011 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -316,6 +341,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000001 /* PrismHostApp.swift in Sources */,
+                510000000000000000000004,
 				300000000000000000000603 /* PrismShellView.swift in Sources */,
 				300000000000000000000602 /* NativeShellServices.swift in Sources */,
 				300000000000000000000601 /* ShellHostModel.swift in Sources */,
@@ -360,6 +386,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+        510000000000000000000009 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (510000000000000000000001,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -368,6 +395,7 @@
 			target = 100000000000000000000300 /* PrismHost */;
 			targetProxy = 100000000000000000000020 /* PBXContainerItemProxy */;
 		};
+        510000000000000000000008 = {isa = PBXTargetDependency; target = 100000000000000000000300; targetProxy = 510000000000000000000007; };
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -612,6 +640,8 @@
 			};
 			name = Release;
 		};
+        510000000000000000000014 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHostUITests; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = PrismHost;}; name = Debug; };
+        510000000000000000000015 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.prismos.PrismHostUITests; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = PrismHost;}; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -651,6 +681,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+        510000000000000000000013 = {isa = XCConfigurationList; buildConfigurations = (510000000000000000000014,510000000000000000000015,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
 /* End XCConfigurationList section */
 /* Begin XCLocalSwiftPackageReference section */
 		100000000000000000000500 /* XCLocalSwiftPackageReference "../../Packages/PrismCore" */ = {

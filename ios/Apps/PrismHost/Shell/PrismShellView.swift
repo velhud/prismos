@@ -24,6 +24,7 @@ private struct ShellHomeView: View {
     @EnvironmentObject private var host: ShellHostModel
     @State private var input = ""
     @State private var project = ""
+    @FocusState private var inputFocused: Bool
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -39,9 +40,9 @@ private struct ShellHomeView: View {
                     }
                     TextField("Project (optional)", text: $project).textFieldStyle(.roundedBorder)
                     TextField("Ask Prism or capture a thought", text: $input, axis: .vertical)
-                        .lineLimit(3...8).textFieldStyle(.roundedBorder).accessibilityIdentifier("assistant.input")
+                        .lineLimit(3...8).textFieldStyle(.roundedBorder).focused($inputFocused).accessibilityIdentifier("assistant.input")
                     HStack {
-                        Button("Ask", systemImage: "arrow.up.circle.fill") { engine.submit(input); input = "" }
+                        Button("Ask", systemImage: "arrow.up.circle.fill") { inputFocused = false; engine.submit(input); input = "" }
                             .buttonStyle(.borderedProminent).accessibilityIdentifier("assistant.ask")
                         Button("Speak", systemImage: "mic") { engine.beginListening() }.buttonStyle(.bordered)
                         Button("Blank", systemImage: "xmark") { engine.clear() }.buttonStyle(.bordered).accessibilityIdentifier("assistant.blank")
@@ -54,7 +55,9 @@ private struct ShellHomeView: View {
                         }
                     }
                     if let candidate = engine.activeCandidate {
-                        Text("\(candidate.source.capitalized) · \(candidate.reason)").font(.caption).foregroundStyle(.secondary)
+                        Text("\(candidate.source.capitalized) · \(candidate.eventTime.formatted(date: .omitted, time: .shortened))").font(.caption)
+                        Text(engine.archive.candidateHistory[candidate.id]?.interpretation ?? candidate.reason).font(.caption).foregroundStyle(.secondary)
+                        if let expires = engine.expiresAt { Text("Until " + expires.formatted(date: .omitted, time: .shortened)).font(.caption) }
                         HStack {
                             Button("Dismiss") { host.perform { try engine.dismissCandidate() } }
                             Button("Snooze 5 min") { host.perform { try engine.dismissCandidate(snoozeSeconds: 300) } }
@@ -75,9 +78,9 @@ private struct ShellHomeView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(receipt.summary).font(.headline)
                             if receipt.status == .succeeded && receipt.undoToken != nil {
-                                Button("Undo", systemImage: "arrow.uturn.backward") { host.perform { try await engine.undo(receiptID: receipt.id) } }
+                                Button("Undo", systemImage: "arrow.uturn.backward") { host.perform { try await engine.undo(receiptID: receipt.id) } }.accessibilityIdentifier("assistant.undo")
                             }
-                            if receipt.status == .uncertain {
+                            if [.uncertain, .undoUncertain].contains(receipt.status) {
                                 Button("Check action outcome") { host.perform { try await engine.reconcile(receiptID: receipt.id) } }
                             }
                         }.padding().background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -96,6 +99,7 @@ private struct ActionPreview: View {
             Text(action.summary).font(.headline)
             if let title = action.arguments.title { Text(title) }
             if let body = action.arguments.body { Text(body).textSelection(.enabled) }
+            if let query = action.arguments.query { Text(query) }
             if let project = action.arguments.project { Text("Project: \(project)") }
             if let topic = action.arguments.topic { Text("Topic: \(topic)") }
             if let date = action.arguments.dueAt { Text(date.formatted(date: .complete, time: .shortened)) }
@@ -226,7 +230,7 @@ private struct ReceiptDetailView: View {
                     if receipt.status == .succeeded && receipt.undoToken != nil {
                         Button("Undo action") { host.perform { try await engine.undo(receiptID: receipt.id) } }
                     }
-                    if receipt.status == .uncertain {
+                    if [.uncertain, .undoUncertain].contains(receipt.status) {
                         Button("Check outcome") { host.perform { try await engine.reconcile(receiptID: receipt.id) } }
                     }
                     ShareLink(item: receipt.summary)
@@ -247,9 +251,15 @@ private struct ArtifactDetailView: View {
         ScrollView { VStack(alignment: .leading, spacing: 16) {
             Text(displayed.title).font(.headline); Text(displayed.body).textSelection(.enabled)
             Text("Source: \(displayed.provenance.source)")
+            if let candidate = displayed.candidate {
+                Text(candidate.reason)
+                Text("Event: " + candidate.eventTime.formatted())
+                Text("Observed: " + candidate.observedAt.formatted()).font(.caption)
+                Text("Expires: " + candidate.expiresAt.formatted()).font(.caption)
+            }
             if let provider = displayed.provenance.provider { Text("Processed by \(provider)") }
             Text(displayed.provenance.createdAt.formatted()).font(.caption)
-            ShareLink(item: displayed.body)
+            ShareLink(item: displayed.body).accessibilityIdentifier("artifact.share")
             if displayed.kind == .note {
                 Button("Edit note") { editTitle = displayed.title; editBody = displayed.body; editing = true }
             }
@@ -258,7 +268,7 @@ private struct ArtifactDetailView: View {
         .sheet(isPresented: $editing) {
             NavigationStack { Form {
                 TextField("Title", text: $editTitle)
-                TextEditor(text: $editBody).frame(minHeight: 240)
+                TextEditor(text: $editBody).frame(minHeight: 240).accessibilityIdentifier("artifact.editBody")
                 Button("Save changes") { host.perform { try host.engine?.editNote(artifact.id, title: editTitle, body: editBody); editing = false } }
             }.navigationTitle("Edit note") }
         }
@@ -285,13 +295,18 @@ private struct ShellSettingsView: View {
                 Button("Forget Monocle", role: .destructive) { host.link.forget() }
             }
             Section("Assistant and voice") {
-                Toggle("Allow cloud processing", isOn: privacy(\.cloudProcessing))
+                Toggle("Allow cloud processing", isOn: privacy(\.cloudProcessing)).accessibilityIdentifier("settings.cloud")
                 Text("Requests, permitted context and recordings are sent to the configured API provider. API billing is separate from ChatGPT or Codex subscriptions.").font(.caption)
                 SecureField("Assistant API key", text: $key).textContentType(.password)
                 Button(saved ? "Key saved" : "Save key") { saved = host.saveKey(key); key = "" }
                 Button("Remove key", role: .destructive) { host.removeKey(); saved = false }
                 Toggle("Spoken responses", isOn: privacy(\.spokenOutput))
                 Text("Speech uses the iPhone voice and current headphones or speaker. A route change stops playback.").font(.caption)
+            }
+            Section("Focus timer alerts") {
+                Button("Allow timer notifications") { host.perform { _ = try await host.timerNotifications.requestAccess(); host.objectWillChange.send() } }
+                Text(host.timerNotifications.status).font(.caption)
+                Text("Timers persist locally. iOS can deliver an allowed alert while PrismOS is in the background.").font(.caption)
             }
             Section("Context") {
                 Button("Allow Calendar access") {

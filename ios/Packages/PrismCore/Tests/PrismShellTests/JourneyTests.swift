@@ -41,6 +41,9 @@ actor ReplayHTTP: ShellHTTPTransport {
     var creates = 0
     var deletes = 0
     var failAfterCreate = false
+    var failAfterUndo = false
+    var beforeUndoReturn: (() -> Void)?
+    var beforeFindReturn: (() -> Void)?
     init(time: Date) { snapshot = ContextSnapshot(observedAt: time) }
     func context(privacy: PrivacySettings, now: Date) async -> ContextSnapshot { snapshot }
     func createReminder(arguments: ToolArguments, idempotencyKey: String) async throws -> String {
@@ -48,8 +51,8 @@ actor ReplayHTTP: ShellHTTPTransport {
         creates += 1; let id = UUID().uuidString; effects[idempotencyKey] = id
         if failAfterCreate { throw ShellError.uncertain }; return id
     }
-    func findReminder(idempotencyKey: String) async throws -> String? { effects[idempotencyKey] }
-    func undoReminder(externalID: String, idempotencyKey: String) async throws { deletes += 1; effects.removeValue(forKey:idempotencyKey) }
+    func findReminder(idempotencyKey: String) async throws -> String? { beforeFindReturn?(); return effects[idempotencyKey] }
+    func undoReminder(externalID: String, idempotencyKey: String) async throws { deletes += 1; effects.removeValue(forKey:idempotencyKey); beforeUndoReturn?(); if failAfterUndo { throw ShellError.uncertain } }
 }
 @MainActor final class FrameLinkDouble: ShellDeviceLink {
     var payloads: [Data] = []
@@ -96,6 +99,50 @@ final class JourneyTests: XCTestCase {
     }
     func plan(_ answer: String, actions: [ProposedAction] = [], project: String? = nil) -> ExperiencePlan {
         .init(turn:.init(canonicalAnswer:answer,spokenResponse:"A separate complete spoken explanation.",lensScene:.init(kind:.fact,title:"KEY FACT",body:"42"),proposedActions:actions,project:project))
+    }
+    @MainActor func testConversationalChoiceContinuesRealContextWithoutAnExternalEffect() async throws {
+        let choice = ProposedAction(id:"detail", tool:.continueConversation, summary:"Explain the tradeoff", arguments:.init(query:"Explain the battery tradeoff in detail."))
+        let http = try ReplayHTTP([plan("Choose a direction",actions:[choice]),plan("The complete tradeoff explanation")])
+        let (engine,repo,native,_,_) = try make(http)
+        engine.submit("Help me choose"); await engine.waitForCurrentTurn()
+        try await engine.confirm(actionID:"detail",revision:engine.archive.revision)
+        await engine.waitForCurrentTurn()
+        XCTAssertEqual(engine.currentRecord?.turn?.canonicalAnswer,"The complete tradeoff explanation")
+        let requests = try await http.inputs()
+        XCTAssertEqual(requests.last?.input,choice.arguments.query)
+        XCTAssertTrue(requests.last?.context.recentTurns.contains { $0.userText == "Help me choose" } == true)
+        XCTAssertEqual(try repo.load().receipts.last?.action.tool,.continueConversation)
+        XCTAssertNil(engine.lastReceipt?.undoToken); XCTAssertEqual(native.creates,0)
+    }
+    @MainActor func testBlankDuringNativeUndoAndReconciliationNeverResurrectsSurface() async throws {
+        let action = ProposedAction(id:"r",tool:.createReminder,summary:"Reminder",arguments:.init(title:"Review",dueAt:time.addingTimeInterval(300)))
+        let (engine,_,native,_,_) = try make(try ReplayHTTP([plan("Confirm",actions:[action])]))
+        engine.submit("Remind me"); await engine.waitForCurrentTurn()
+        try await engine.confirm(actionID:"r",revision:engine.archive.revision)
+        let key = try XCTUnwrap(engine.lastReceipt?.id)
+        native.failAfterUndo = true; native.beforeUndoReturn = { engine.clear() }
+        try await engine.undo(receiptID:key)
+        XCTAssertEqual(engine.scene.kind,.blank); XCTAssertEqual(engine.lastReceipt?.status,.undoUncertain)
+        native.beforeFindReturn = { engine.clear() }
+        try await engine.reconcile(receiptID:key)
+        XCTAssertEqual(engine.scene.kind,.blank); XCTAssertEqual(engine.lastReceipt?.status,.undone)
+        XCTAssertEqual(native.deletes,1)
+    }
+    @MainActor func testProactiveFailedEvaluationRetriesAfterCooldownThenStaysQuiet() async throws {
+        let candidate = "calendar:event:1800000300:1800000300"
+        let decision = ExperiencePlan(turn:.init(canonicalAnswer:"The event is unrelated to the current focus.",proactiveDecision:.init(candidateID:candidate,disposition:.suppress,reason:"No useful contextual interruption")))
+        let http = try ReplayHTTP([plan("Missing proactive decision"),decision])
+        let (engine,_,native,_,_) = try make(http)
+        var clock = time; engine.now = { clock }
+        var privacy = engine.archive.privacy; privacy.calendarEnabled = true; privacy.proactiveEnabled = true; try engine.updatePrivacy(privacy)
+        native.snapshot.calendar = [.init(id:"event",title:"A real event",start:time.addingTimeInterval(300),end:time.addingTimeInterval(600))]
+        await engine.refreshContext(); await engine.considerProactivity()
+        XCTAssertEqual(engine.archive.candidateHistory[candidate]?.state,.evaluated)
+        await engine.considerProactivity(); let firstCount = await http.count(); XCTAssertEqual(firstCount,1)
+        clock = time.addingTimeInterval(61); await engine.considerProactivity()
+        XCTAssertEqual(engine.archive.candidateHistory[candidate]?.state,.suppressed)
+        await engine.considerProactivity(); let finalCount = await http.count(); XCTAssertEqual(finalCount,2)
+        XCTAssertEqual(engine.scene.kind,.blank)
     }
     @MainActor func testFiveTurnsPreserveLongTruthAcrossActualModelAdapterRendererLinkAndRestart() async throws {
         let full = String(repeating:"The detailed analysis includes context and all conclusions. ",count:1000) + "END OF COMPLETE ANSWER"
@@ -399,5 +446,61 @@ extension JourneyTests {
         XCTAssertTrue(engine.actions.isEmpty); XCTAssertEqual(engine.archive.receipts.count,2)
         XCTAssertEqual(try repo.load().timer?.title,"Editing")
         XCTAssertFalse(engine.viewport.primitives.contains { if case .text("R CONFIRM  L CANCEL",_,_,_,_) = $0 { return true }; return false })
+    }
+}
+
+extension JourneyTests {
+    @MainActor func testLeftCancelsCurrentReviewWithoutUndoingAnEarlierReceipt() async throws {
+        let first = ProposedAction(id:"one",tool:.saveNote,summary:"Save first",arguments:.init(title:"One",body:"Original note"))
+        let second = ProposedAction(id:"two",tool:.saveNote,summary:"Save second",arguments:.init(title:"Two",body:"Second note"))
+        let (engine,_,_,_,_) = try make(try ReplayHTTP([plan("Two separate notes",actions:[first,second])]))
+        engine.submit("Save two notes"); await engine.waitForCurrentTurn()
+        try await engine.confirm(actionID:"one",revision:engine.archive.revision)
+        try await engine.handleGesture(side:"R",gesture:"TAP")
+        XCTAssertTrue(engine.isReviewingAction)
+        try await engine.handleGesture(side:"L",gesture:"TAP")
+        XCTAssertFalse(engine.isReviewingAction)
+        XCTAssertEqual(engine.lastReceipt?.status,.succeeded)
+        XCTAssertEqual(engine.archive.search("Original note").filter { $0.kind == .note }.count,1)
+        XCTAssertEqual(engine.actions.map(\.id),["two"])
+    }
+    @MainActor func testExpiredReviewAndChoiceDoNotExtendActionAuthority() async throws {
+        let action = ProposedAction(id:"note",tool:.saveNote,summary:"Save",arguments:.init(title:"Note",body:"Text"))
+        let (engine,_,_,_,_) = try make(try ReplayHTTP([plan("Confirm",actions:[action])]))
+        engine.submit("Save"); await engine.waitForCurrentTurn()
+        let expiry = engine.expiresAt
+        let later = time.addingTimeInterval(31); engine.now = { later }
+        engine.nextChoice(); XCTAssertEqual(engine.expiresAt,expiry)
+        do { try await engine.reviewOrConfirm(actionID:"note"); XCTFail("Expired review must fail") } catch {}
+        XCTAssertTrue(engine.archive.receipts.isEmpty)
+    }
+    @MainActor func testOldSessionAndTimerUndoCannotOverwriteLaterState() async throws {
+        let session1 = ProposedAction(id:"a",tool:.setSession,summary:"Focus",arguments:.init(project:"A",sessionKind:.focus))
+        let session2 = ProposedAction(id:"b",tool:.setSession,summary:"Walk",arguments:.init(project:"B",sessionKind:.walk))
+        let timer = ProposedAction(id:"c",tool:.startTimer,summary:"Start",arguments:.init(title:"Focus",seconds:60))
+        let stop = ProposedAction(id:"d",tool:.stopTimer,summary:"Stop",arguments:.init())
+        let (engine,_,_,_,_) = try make(try ReplayHTTP([plan("Confirm",actions:[session1,session2,timer,stop])]))
+        engine.submit("Prepare actions"); await engine.waitForCurrentTurn()
+        try await engine.confirm(actionID:"a",revision:engine.archive.revision); let firstSession = try XCTUnwrap(engine.lastReceipt?.id)
+        try await engine.confirm(actionID:"b",revision:engine.archive.revision)
+        do { try await engine.undo(receiptID:firstSession); XCTFail("Cannot overwrite later session") } catch {}
+        XCTAssertEqual(engine.archive.session.project,"B")
+        try await engine.confirm(actionID:"c",revision:engine.archive.revision); let firstTimer = try XCTUnwrap(engine.lastReceipt?.id)
+        try await engine.confirm(actionID:"d",revision:engine.archive.revision)
+        do { try await engine.undo(receiptID:firstTimer); XCTFail("Cannot undo across newer stop") } catch {}
+        XCTAssertNil(engine.archive.timer)
+    }
+    @MainActor func testUncertainUndoIsJournaledRestoredAndReconciledWithoutRepeatingDeletion() async throws {
+        let action = ProposedAction(id:"remind",tool:.createReminder,summary:"Call",arguments:.init(title:"Call",dueAt:time.addingTimeInterval(60)))
+        let (engine,repo,native,link,voice) = try make(try ReplayHTTP([plan("Confirm",actions:[action])]))
+        engine.submit("Remind"); await engine.waitForCurrentTurn(); try await engine.confirm(actionID:"remind",revision:engine.archive.revision)
+        let id = try XCTUnwrap(engine.lastReceipt?.id); native.failAfterUndo = true
+        try await engine.undo(receiptID:id)
+        XCTAssertEqual(engine.lastReceipt?.status,.undoUncertain); XCTAssertEqual(native.deletes,1)
+        let restored = try AssistantOrchestrator(repository:repo,model:engine.model,native:native,link:link,voice:voice,now:{self.time})
+        XCTAssertEqual(restored.lastReceipt?.status,.undoUncertain)
+        do { try await restored.undo(receiptID:id); XCTFail("Reconcile before retry") } catch {}
+        try await restored.reconcile(receiptID:id)
+        XCTAssertEqual(restored.lastReceipt?.status,.undone); XCTAssertEqual(native.deletes,1)
     }
 }

@@ -125,3 +125,11 @@ extension ContractTests {
     }
 }
 import PrismProtocol
+
+extension ContractTests {
+    func testModelCannotManufactureHostReceiptArtifacts() throws {
+        let plan = ExperiencePlan(turn:.init(canonicalAnswer:"A claim",artifacts:[.init(title:"Created",body:"Fabricated receipt",kind:.receipt)]))
+        XCTAssertThrowsError(try plan.validate(now:Date()))
+        XCTAssertThrowsError(try ExperienceSchema.decode(ShellJSON.encoder().encode(plan),now:Date()))
+    }
+}

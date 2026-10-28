@@ -19,7 +19,7 @@ public enum ExperienceSchema {
                             "items": array(item), "progress": nullable(["type": "number"]), "timerEnd": nullable(["type": "string"]),
                             "expiresInSeconds": ["type": "integer"]])
         let action = object(["id": string, "tool": enumeration(ToolName.allCases.map(\.rawValue)), "summary": string, "arguments": arguments])
-        let artifact = object(["title": string, "body": string, "kind": enumeration(ArtifactKind.allCases.map(\.rawValue)),
+        let artifact = object(["title": string, "body": string, "kind": enumeration(ArtifactKind.allCases.filter { $0 != .receipt }.map(\.rawValue)),
                                "project": nullable(string), "topic": nullable(string)])
         let decision = object(["candidateID": string, "disposition": enumeration(["show", "phoneOnly", "suppress"]), "reason": string])
         return object(["version": ["type": "integer", "enum": [1]], "turn": object([
